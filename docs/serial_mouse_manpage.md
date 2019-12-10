@@ -5,11 +5,11 @@ The following text is taken from the linux [man page](https://www.systutorials.c
 The pinout of the usual 9 pin plug as used for serial mice is:
 ```
 pin	name	used for
-2	RX		Data
-3	TX		-12 V, Imax = 10 mA
-4	DTR		+12 V, Imax = 10 mA
-7	RTS		+12 V, Imax = 10 mA
-5	GND		Ground
+2	RX	Data
+3	TX	-12 V, Imax = 10 mA
+4	DTR	+12 V, Imax = 10 mA
+7	RTS	+12 V, Imax = 10 mA
+5	GND	Ground
 ```
 This is the specification, in fact 9 V suffices with most mice.
 
