@@ -159,17 +159,18 @@ The host can inhibit mouse transmission by forcing CLK to "0".
 If the host inhibits the mouse while it is transmitting, the byte must be retransmitted (if the inhibit state arrived before the 11th clock).
 
 #### Receiving
-Receiving data: Check 'clock'. If inactive, there is a bit on the 'data' line.
+Receiving data: Check 'clock'.
+If inactive, there is a bit on the 'data' line.
 Each transmission unit is one start bit, eight data bits, odd parity and one stop bit. Start bits are low, stop bits high.
 Each clock active or inactive period is 30 to 50 microseconds. Data transition to falling edge of clock is 5 to 25 microseconds.
 
 #### Sending
-Sending: Check that both clock and data are high. Pull down data for start bit, and start clocking.
+Sending: Check that both clock and data are high.
+Pull down data for start bit, and start clocking.
 
-NOTE: Logitech has made the extension to this protocol to allow three buttons (the M bit is always 0 on 2 button mice).
+**NOTE:** Logitech has made the extension to this protocol to allow three buttons (the M bit is always 0 on 2 button mice).
 
 ## References
-
 * [Original PC mouse info page by Tomi Engdahl](http://www.hut.fi/~then/mytexts/mouse.html)
 * PC Magazine May 28, 1991
 * [Programmer's Reference to Genius Mouse](ftp://x2ftp.oulu.fi/pub/msdos/programming/docs/gmouse.doc)
