@@ -6,6 +6,7 @@
 
 The Microsoft serial mouse is the most popular 2 button mouse.
 It is supported by all major operating systems.
+
 The maximum tracking rate for a Microsoft mouse is 40 reports/second * 127 counts per report, in other words, 5080 counts per second.
 The most common range for mice is is 100 to 400 CPI (counts per inch) but can be up to 1000 CPI.
 A 100CPI mouse can discriminate motion up to 50.8 inches/second while a 400 CPI mouse can only discriminate motion up to 12.7 inches/second.
