@@ -41,7 +41,7 @@ void static (*keypress_callback)(uint8_t *code, uint8_t count) = ps2_dumb_print;
 static volatile uint8_t ps2_data, ps2_flag;
 
 int parity_check(uint8_t flag_i, uint8_t data_i);
-void pushScancode(uint8_t code);
+void pushData(uint8_t data);
 
 void ps2_dumb_print(uint8_t *code, uint8_t count) {
 	//printf("%.2X %.2X %.2X\n", code[0], code[1], code[2]);
@@ -116,7 +116,8 @@ void ps2mouse_init(volatile uint8_t *dataPort, volatile uint8_t *dataDir, volati
 #endif
 }
 
-void pushScancode(uint8_t code) {
+void pushData(uint8_t data) {
+	// TODO: Do something with this data
 }
 
 void ps2mouse_setCallback(void (*callback)(uint8_t *code, uint8_t count)) {
@@ -250,7 +251,7 @@ ISR(INT0_vect) { // Manage INT0
 	} else { // Rising edge
 		if(!(--bitCount)) {
 			if (!START_BIT(ps2_flag) && STOP_BIT(ps2_flag) && parity_check(ps2_flag, ps2_data)) {
-				pushScancode(ps2_data);
+				pushData(ps2_data);
 			} // Else... there was a problem somewhere, probably timing
 
 			ps2_data = 0;
