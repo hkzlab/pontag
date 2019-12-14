@@ -24,13 +24,8 @@ static volatile uint8_t cPNum;
 #define CLOCK_RISE 1
 #define PS2_START_BITCOUNT 11 // 12 bits is only for host-to-device communication
 
-#define KEY_BUF_SIZE 8
-
 static volatile uint8_t clock_edge;
 static volatile uint8_t bitCount;
-
-static volatile uint8_t keyBuffer[KEY_BUF_SIZE];
-static volatile uint8_t *inPtr, *outPtr, *endPtr;
 
 #define START_BIT(a) ((a >> 0) & 0x01)
 #define PARITY_BIT(a) ((a >> 1) & 0x01)
@@ -43,7 +38,7 @@ static volatile uint8_t *inPtr, *outPtr, *endPtr;
 void ps2_dumb_print(uint8_t *code, uint8_t count);
 
 void static (*keypress_callback)(uint8_t *code, uint8_t count) = ps2_dumb_print;
-static volatile uint8_t data, flag;
+static volatile uint8_t ps2_data, ps2_flag;
 
 int parity_check(uint8_t flag_i, uint8_t data_i);
 void pushScancode(uint8_t code);
@@ -104,15 +99,12 @@ void ps2mouse_init(volatile uint8_t *dataPort, volatile uint8_t *dataDir, volati
 	// I suspect this to be totally useless...
 	//PCMSK |= (1<<PIND2);	// Enable pin change on INT0 (why is this required?)
 
+	// Clear the fields used by the interrupt callback
 	clock_edge = CLOCK_FALL;
 	bitCount = PS2_START_BITCOUNT;
 
-	data = 0;
-	flag = 0;
-
-	// Prepare the ring buffer...
-	inPtr = outPtr = keyBuffer;
-	endPtr = inPtr + KEY_BUF_SIZE;
+	ps2_data = 0;
+	ps2_flag = 0;
 
 	// Enable INT0
 #if defined (__AVR_ATmega128__) || defined (__AVR_ATmega328P__)
@@ -238,15 +230,15 @@ ISR(INT0_vect) { // Manage INT0
 		// bit 0 is start bit, bit 9,10 are parity and stop bits
 		// What is left are the data bits!
 		if (bitCount < 11 && bitCount > 2) { 
-			data >>= 1; // Shift the data
+			ps2_data >>= 1; // Shift the data
 
-			if (kBit) data |= 0x80; // Add a bit if the read data is one
+			if (kBit) ps2_data |= 0x80; // Add a bit if the read data is one
 		} else if (bitCount == 11) { // start bit, must always be 0!
-			SET_START_BIT(flag, kBit);
+			SET_START_BIT(ps2_flag, kBit);
 		} else if (bitCount == 2) { // Parity bit: 1 if there is an even number of 1s in the data bits
-			SET_PARITY_BIT(flag, kBit);			
+			SET_PARITY_BIT(ps2_flag, kBit);			
 		} else if (bitCount == 1) { // Stop bit, must always be 1!
-			SET_STOP_BIT(flag, kBit);	
+			SET_STOP_BIT(ps2_flag, kBit);	
 		}
 		clock_edge = CLOCK_RISE;			// Ready for rising edge.
 
@@ -257,12 +249,12 @@ ISR(INT0_vect) { // Manage INT0
 #endif
 	} else { // Rising edge
 		if(!(--bitCount)) {
-			if (!START_BIT(flag) && STOP_BIT(flag) && parity_check(flag, data)) {
-				pushScancode(data);
+			if (!START_BIT(ps2_flag) && STOP_BIT(ps2_flag) && parity_check(ps2_flag, ps2_data)) {
+				pushScancode(ps2_data);
 			} // Else... there was a problem somewhere, probably timing
 
-			data = 0;
-			flag = 0;
+			ps2_data = 0;
+			ps2_flag = 0;
 
 			bitCount = PS2_START_BITCOUNT; // Start over.
 		}
