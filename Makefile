@@ -44,7 +44,7 @@ FORMAT = ihex
 TARGET = out/pontag
 
 # List C source files here. (C dependencies are automatically generated.)
-SRC = src/main.c 
+SRC = src/main.c src/libs/ps2_mouse/ps2_mouse.c
 
 # List Assembler source files here.
 #     Make them always end in a capital .S.  Files ending in a lowercase .s
@@ -93,7 +93,7 @@ CDEFS = -DF_CPU=$(F_CPU)UL
 
 
 # Place -I options here
-CINCS = -Isrc/libs/ 
+CINCS = -Isrc/libs/ -Isrc/libs/ps2_mouse/
 
 
 #---------------- Compiler Options ----------------
