@@ -35,6 +35,10 @@ static volatile uint8_t bitCount;
 #define SET_PARITY_BIT(a, b) (a |= (b << 1))
 #define SET_STOP_BIT(a, b) (a |= (b << 2))
 
+#define DATA_BUFFER_SIZE 8
+static volatile uint8_t buf_head_idx, buf_tail_idx, buf_full;
+static volatile uint8_t data_buf[DATA_BUFFER_SIZE];
+
 void ps2_dumb_print(uint8_t *code, uint8_t count);
 
 void static (*keypress_callback)(uint8_t *code, uint8_t count) = ps2_dumb_print;
@@ -42,6 +46,7 @@ static volatile uint8_t ps2_data, ps2_flag;
 
 int parity_check(uint8_t flag_i, uint8_t data_i);
 void pushData(uint8_t data);
+void buf_clear(void);
 
 void ps2_dumb_print(uint8_t *code, uint8_t count) {
 	//printf("%.2X %.2X %.2X\n", code[0], code[1], code[2]);
@@ -59,9 +64,18 @@ int parity_check(uint8_t flag_i, uint8_t data_i) {
 	return (result == PARITY_BIT(flag_i));
 }
 
+void buf_clear(void) {
+	buf_head_idx = buf_tail_idx = 0;
+	buf_full = 0;
+}
+
 // See http://avrprogrammers.com/example_avr_keyboard.php
 // http://elecrom.wordpress.com/2008/02/12/avr-tutorial-2-avr-input-output/
 void ps2mouse_init(volatile uint8_t *dataPort, volatile uint8_t *dataDir, volatile uint8_t *dataPin, uint8_t pNum) {
+	// Clear the buffer variables
+	buf_clear();
+
+	// Prepare structures for AVR ports
 	dPort = dataPort;
 	dPin = dataPin;
 	dDir = dataDir;
@@ -116,8 +130,22 @@ void ps2mouse_init(volatile uint8_t *dataPort, volatile uint8_t *dataDir, volati
 #endif
 }
 
+void ps2mouse_reset() {
+	// TODO: Implement the code to reset the mouse
+}
+
 void pushData(uint8_t data) {
-	// TODO: Do something with this data
+	data_buf[buf_head_idx] = data;	
+	if(buf_tail_idx < 0) buf_tail_idx = buf_head_idx; // First data
+
+	// Increment the data pointer
+	buf_head_idx = (buf_head_idx + 1) % DATA_BUFFER_SIZE;
+
+	// Buffer got full, or was full already
+	if(buf_head_idx == buf_tail_idx) {
+		buf_full = 1;
+		buf_tail_idx = (buf_tail_idx + 1) % DATA_BUFFER_SIZE;
+	}
 }
 
 void ps2mouse_setCallback(void (*callback)(uint8_t *code, uint8_t count)) {
@@ -130,7 +158,6 @@ void ps2mouse_sendCommand(uint8_t *command, uint8_t length) {
 	uint8_t parity_check;
 
 	// Send host-to-device command...
-
 	cli(); // Disable all interrupts in preparation to command sending
 
 	// Iterate over all the data bytes we have to send
