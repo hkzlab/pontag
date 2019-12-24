@@ -33,13 +33,14 @@ static volatile uint8_t bitCount;
 #define SET_PARITY_BIT(a, b) (a |= (b << 1))
 #define SET_STOP_BIT(a, b) (a |= (b << 2))
 
-#define DATA_BUFFER_SIZE 3 // The usual size of PS/2 mouse protocol commands
 static volatile uint8_t data_buf[DATA_BUFFER_SIZE];
+static volatile uint8_t bak_data_buf[DATA_BUFFER_SIZE];
 static volatile uint8_t data_buf_idx = 0;
+static volatile uint8_t buf_enabled = 0;
+static volatile uint8_t bak_data_buf_counter = 0;
 
 void ps2_dumb_print(uint8_t *code, uint8_t count);
 
-void static (*mouse_callback)(uint8_t *code, uint8_t count) = ps2_dumb_print;
 static volatile uint8_t ps2_data, ps2_flag;
 
 int parity_check(uint8_t flag_i, uint8_t data_i);
@@ -70,6 +71,7 @@ void buf_clear(void) {
 // http://elecrom.wordpress.com/2008/02/12/avr-tutorial-2-avr-input-output/
 void ps2mouse_init(volatile uint8_t *dataPort, volatile uint8_t *dataDir, volatile uint8_t *dataPin, uint8_t pNum) {
 	// Clear the buffer variables
+	buf_enabled = 0;
 	buf_clear();
 
 	// Prepare structures for AVR ports
@@ -128,9 +130,9 @@ void ps2mouse_init(volatile uint8_t *dataPort, volatile uint8_t *dataDir, volati
 }
 
 void ps2mouse_reset() {
-	uint8_t command;
+	buf_enabled = 0;
 
-	command = PS2_MOUSE_CMD_RESET;
+	uint8_t command = PS2_MOUSE_CMD_RESET;
 	ps2mouse_sendCommand(&command, 1); // This also enables interrupts
     _delay_ms(100);
 
@@ -140,18 +142,28 @@ void ps2mouse_reset() {
 	
 	command = PS2_MOUSE_CMD_ENABLE;
 	ps2mouse_sendCommand(&command, 1); // This also enables interrupts
-    _delay_ms(100);
+    _delay_ms(250);
+	buf_clear();
+	buf_enabled = 1; // Start accepting data
 }
 
 void pushData(uint8_t data) {
+	if(!buf_enabled) return;
+
 	data_buf[data_buf_idx] = data;
 	data_buf_idx = (data_buf_idx + 1) % DATA_BUFFER_SIZE;
-	if(data_buf_idx == 0)
-		fprintf(stdout, "%.2X %.2X %.2X\n", data_buf[0], data_buf[1], data_buf[2]);
+	if(data_buf_idx == 0) {
+		for(uint8_t idx = 0; idx < DATA_BUFFER_SIZE; idx++) bak_data_buf[idx] = data_buf[idx];
+		bak_data_buf_counter++;
+	}
 }
 
-void ps2mouse_setCallback(void (*callback)(uint8_t *code, uint8_t count)) {
-	mouse_callback = callback;
+uint8_t ps2mouse_getBufCounter(void) {
+	return bak_data_buf_counter;
+}
+
+volatile uint8_t *ps2mouse_getBuffer(void) {
+	return bak_data_buf;
 }
 
 // See http://www.avrfreaks.net/index.php?name=PNphpBB2&file=viewtopic&t=134386

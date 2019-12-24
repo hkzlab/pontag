@@ -38,23 +38,17 @@ int main(void) {
     _delay_ms(100);
 
 	ps2mouse_reset(); // This also enables interrupts
-	uint8_t command;
+    
+    uint8_t buf_counter = 0;
+    while(1) {
+        uint8_t cur_counter = ps2mouse_getBufCounter();
+        if(cur_counter != buf_counter) {
+            uint8_t *buf = (uint8_t*)ps2mouse_getBuffer();
+            buf_counter = cur_counter;
 
-	/*command = PS2_MOUSE_CMD_RESET;
-	ps2mouse_sendCommand(&command, 1); // This also enables interrupts
-	command = PS2_MOUSE_CMD_SET_DEFAULTS;
-	ps2mouse_sendCommand(&command, 1); // This also enables interrupts
-	command = PS2_MOUSE_CMD_DISABLE;
-	ps2mouse_sendCommand(&command, 1); // This also enables interrupts
-    command = PS2_MOUSE_CMD_READID;
-	ps2mouse_sendCommand(&command, 1); // This also enables interrupts
-	ps2mouse_sendCommand(&command, 1); // This also enables interrupts
-	ps2mouse_sendCommand(&command, 1); // This also enables interrupts
-	ps2mouse_sendCommand(&command, 1); // This also enables interrupts
-	ps2mouse_sendCommand(&command, 1); // This also enables interrupts
-	ps2mouse_sendCommand(&command, 1); // This also enables interrupts
-*/
-	while(1);
+            fprintf(stdout, "%.2X %.2X %.2X\n", buf[0], buf[1], buf[2]);
+        }
+    }
 
     return 0;
 }
