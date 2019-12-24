@@ -135,8 +135,10 @@ void ps2mouse_reset() {
 }
 
 void pushData(uint8_t data) {
+	if(buf_head_idx < 0) {
+		buf_head_idx = buf_tail_idx = 0; // First data inserted...
+	}
 	data_buf[buf_head_idx] = data;	
-	if(buf_tail_idx < 0) buf_tail_idx = buf_head_idx; // First data
 
 	// Increment the data pointer
 	buf_head_idx = (buf_head_idx + 1) % DATA_BUFFER_SIZE;
