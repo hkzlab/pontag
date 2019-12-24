@@ -27,21 +27,19 @@ static volatile uint8_t cPNum;
 static volatile uint8_t clock_edge;
 static volatile uint8_t bitCount;
 
-#define START_BIT(a) ((a >> 0) & 0x01)
 #define PARITY_BIT(a) ((a >> 1) & 0x01)
 #define STOP_BIT(a) ((a >> 2) & 0x01)
 
-#define SET_START_BIT(a, b) (a |= (b << 0))
 #define SET_PARITY_BIT(a, b) (a |= (b << 1))
 #define SET_STOP_BIT(a, b) (a |= (b << 2))
 
-#define DATA_BUFFER_SIZE 8
-static volatile uint8_t buf_head_idx, buf_tail_idx, buf_full;
+#define DATA_BUFFER_SIZE 3 // The usual size of PS/2 mouse protocol commands
 static volatile uint8_t data_buf[DATA_BUFFER_SIZE];
+static volatile uint8_t data_buf_idx = 0;
 
 void ps2_dumb_print(uint8_t *code, uint8_t count);
 
-void static (*keypress_callback)(uint8_t *code, uint8_t count) = ps2_dumb_print;
+void static (*mouse_callback)(uint8_t *code, uint8_t count) = ps2_dumb_print;
 static volatile uint8_t ps2_data, ps2_flag;
 
 int parity_check(uint8_t flag_i, uint8_t data_i);
@@ -49,7 +47,7 @@ void pushData(uint8_t data);
 void buf_clear(void);
 
 void ps2_dumb_print(uint8_t *code, uint8_t count) {
-	//printf("%.2X %.2X %.2X\n", code[0], code[1], code[2]);
+	printf("%.2X %.2X %.2X\n", code[0], code[1], code[2]);
 }
 
 int parity_check(uint8_t flag_i, uint8_t data_i) {
@@ -65,8 +63,7 @@ int parity_check(uint8_t flag_i, uint8_t data_i) {
 }
 
 void buf_clear(void) {
-	buf_head_idx = buf_tail_idx = 0;
-	buf_full = 0;
+	data_buf_idx = 0;
 }
 
 // See http://avrprogrammers.com/example_avr_keyboard.php
@@ -135,23 +132,14 @@ void ps2mouse_reset() {
 }
 
 void pushData(uint8_t data) {
-	if(buf_head_idx < 0) {
-		buf_head_idx = buf_tail_idx = 0; // First data inserted...
-	}
-	data_buf[buf_head_idx] = data;	
-
-	// Increment the data pointer
-	buf_head_idx = (buf_head_idx + 1) % DATA_BUFFER_SIZE;
-
-	// Buffer got full, or was full already
-	if(buf_head_idx == buf_tail_idx) {
-		buf_full = 1;
-		buf_tail_idx = (buf_tail_idx + 1) % DATA_BUFFER_SIZE;
-	}
+	data_buf[data_buf_idx] = data;
+	data_buf_idx = (data_buf_idx + 1) % DATA_BUFFER_SIZE;
+	if(data_buf_idx == 0)
+		fprintf(stdout, "%.2X %.2X %.2X\n", data_buf[0], data_buf[1], data_buf[2]);
 }
 
 void ps2mouse_setCallback(void (*callback)(uint8_t *code, uint8_t count)) {
-	keypress_callback = callback;
+	mouse_callback = callback;
 }
 
 // See http://www.avrfreaks.net/index.php?name=PNphpBB2&file=viewtopic&t=134386
@@ -252,10 +240,15 @@ void ps2mouse_sendCommand(uint8_t *command, uint8_t length) {
 }
 
 ISR(INT0_vect) { // Manage INT0
+	uint8_t start_sync_attempts = 50;
 	uint8_t kBit = 0;
 
 	if (clock_edge == CLOCK_FALL) { // Falling edge
-		kBit = (*dPin & (1 << dPNum)) ? 1 : 0;
+		do { // Synchronize on the start bit
+			_delay_us(1);
+			kBit = (*dPin & (1 << dPNum)) ? 1 : 0;
+		} while((bitCount == 11) && kBit && start_sync_attempts--);
+		if(start_sync_attempts <= 0) return; // Failed the sync...
 
 		// bit 0 is start bit, bit 9,10 are parity and stop bits
 		// What is left are the data bits!
@@ -263,8 +256,6 @@ ISR(INT0_vect) { // Manage INT0
 			ps2_data >>= 1; // Shift the data
 
 			if (kBit) ps2_data |= 0x80; // Add a bit if the read data is one
-		} else if (bitCount == 11) { // start bit, must always be 0!
-			SET_START_BIT(ps2_flag, kBit);
 		} else if (bitCount == 2) { // Parity bit: 1 if there is an even number of 1s in the data bits
 			SET_PARITY_BIT(ps2_flag, kBit);			
 		} else if (bitCount == 1) { // Stop bit, must always be 1!
@@ -279,9 +270,11 @@ ISR(INT0_vect) { // Manage INT0
 #endif
 	} else { // Rising edge
 		if(!(--bitCount)) {
-			if (!START_BIT(ps2_flag) && STOP_BIT(ps2_flag) && parity_check(ps2_flag, ps2_data)) {
+			if (STOP_BIT(ps2_flag) && parity_check(ps2_flag, ps2_data)) {
 				pushData(ps2_data);
-			} // Else... there was a problem somewhere, probably timing
+			} else { // Ok, something went wrong, wait a bit
+				_delay_ms(100);
+			}
 
 			ps2_data = 0;
 			ps2_flag = 0;

@@ -35,7 +35,7 @@ MCU = atmega328p
 #     processor frequency. You can then use this symbol in your source code to 
 #     calculate timings. Do NOT tack on a 'UL' at the end, this will be done
 #     automatically to create a 32-bit value in your source code.
-F_CPU = 8000000
+F_CPU = 16000000
 
 # Output format. (can be srec, ihex, binary)
 FORMAT = ihex
@@ -44,7 +44,7 @@ FORMAT = ihex
 TARGET = out/pontag
 
 # List C source files here. (C dependencies are automatically generated.)
-SRC = src/main.c src/libs/ps2_mouse/ps2_mouse.c
+SRC = src/main.c src/libs/ps2_mouse/ps2_mouse.c src/libs/uart/uart.c
 
 # List Assembler source files here.
 #     Make them always end in a capital .S.  Files ending in a lowercase .s
@@ -93,7 +93,7 @@ CDEFS = -DF_CPU=$(F_CPU)UL
 
 
 # Place -I options here
-CINCS = -Isrc/libs/ -Isrc/libs/ps2_mouse/
+CINCS = -Isrc/libs/ -Isrc/libs/ps2_mouse/ -Isrc/libs/uart/
 
 
 #---------------- Compiler Options ----------------
@@ -206,7 +206,7 @@ AVRDUDE_WRITE_FLASH = -U flash:w:$(TARGET).hex
 # to submit bug reports.
 #AVRDUDE_VERBOSE = -v -v
 
-AVRDUDE_PORT=/dev/cu.usbmodem14201
+AVRDUDE_PORT=/dev/ttyACM0
 #AVRDUDE_PORT=usb
 AVRDUDE_FLAGS = -p m328p -P $(AVRDUDE_PORT) -c $(AVRDUDE_PROGRAMMER) -B2 
 AVRDUDE_FLAGS += $(AVRDUDE_NO_VERIFY)

@@ -9,5 +9,6 @@
 void ps2mouse_init(volatile uint8_t *dataPort, volatile uint8_t *dataDir, volatile uint8_t *dataPin, uint8_t pNum);
 void ps2mouse_setCallback(void (*callback)(uint8_t *code, uint8_t count));
 void ps2mouse_sendCommand(uint8_t *command, uint8_t length);
+void ps2mouse_reset(void);
 
 #endif /* _AVR_PS2_MOUSE_HEADER_ */
