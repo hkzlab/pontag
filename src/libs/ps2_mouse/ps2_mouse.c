@@ -128,7 +128,19 @@ void ps2mouse_init(volatile uint8_t *dataPort, volatile uint8_t *dataDir, volati
 }
 
 void ps2mouse_reset() {
-	// TODO: Implement the code to reset the mouse
+	uint8_t command;
+
+	command = PS2_MOUSE_CMD_RESET;
+	ps2mouse_sendCommand(&command, 1); // This also enables interrupts
+    _delay_ms(100);
+
+	command = PS2_MOUSE_CMD_SET_DEFAULTS;
+	ps2mouse_sendCommand(&command, 1); // This also enables interrupts
+    _delay_ms(100);
+	
+	command = PS2_MOUSE_CMD_ENABLE;
+	ps2mouse_sendCommand(&command, 1); // This also enables interrupts
+    _delay_ms(100);
 }
 
 void pushData(uint8_t data) {

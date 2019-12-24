@@ -39,13 +39,7 @@ int main(void) {
 	ps2mouse_init(&PORTB, &DDRB, &PINB, 1);
     _delay_ms(100);
 
-	commands[0] = 0xF6;
-	ps2mouse_sendCommand(commands, 1); // This also enables interrupts
-    _delay_ms(100);
-
-	commands[0] = 0xF4;
-	ps2mouse_sendCommand(commands, 1); // This also enables interrupts
-    _delay_ms(100);
+	ps2mouse_reset(); // This also enables interrupts
 
 	while(1);
 
