@@ -219,35 +219,27 @@ void ps2mouse_sendCommand(uint8_t *command, uint8_t length) {
 		*dDir &= ~(1 << dPNum); // KB Data line set as input
 		*dPort |= (1 << dPNum); // Pull-up resistor on data line
 		
-		// Wait for the device to bring the clock high and then low
-		while (!(*cPin & (1 << cPNum)));
+		// Wait for the device to bring the data low
+		while (*dPin & (1 << dPNum));
+		// Wait for the device to bring the clock low
 		while (*cPin & (1 << cPNum));
-		
-		// Set the data line low
-		*dDir |= (1 << dPNum); // KB Data line set as output
-		*dPort &= ~(1 << dPNum); // Pull the line low
-		
-		*dDir &= ~(1 << dPNum); // KB Data line set as input
 		
 		// Wait for clock line to get high
 		while (!(*cPin & (1 << cPNum)));
-		while (*cPin & (1 << cPNum)); // Then low
-		while (!(*cPin & (1 << cPNum))); // Then high
-
 		// Wait for the data line to get high
 		while (!(*dPin & (1 << dPNum)));
 
-		_delay_ms(15); // Wait for the device to be ready again
+		//_delay_ms(15); // Wait for the device to be ready again
 	}
 
 	// Prepare data port
 	*dDir &= ~(1 << dPNum); // KB Data line set as input
 	*dPort |= (1 << dPNum); // Pull-up resistor on data line
-
+	
 	// Prepare clock port
 	*cDir &= ~(1 << cPNum); // KB Clock line set as input
 	*cPort |= (1 << cPNum); // Pull-up resistor on clock line
-
+	
 	sei();
 }
 

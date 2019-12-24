@@ -10,11 +10,9 @@
 #include "uart.h"
 
 #include "main.h"
-
+#include "ps2_proto.h"
 
 int main(void) {
-    uint8_t commands[1];
-	
     // Set the pull-up resistor to all unused I/O ...
 	DDRB &= 0x03;
 	PORTB |= 0xFC;
@@ -40,7 +38,22 @@ int main(void) {
     _delay_ms(100);
 
 	ps2mouse_reset(); // This also enables interrupts
+	uint8_t command;
 
+	/*command = PS2_MOUSE_CMD_RESET;
+	ps2mouse_sendCommand(&command, 1); // This also enables interrupts
+	command = PS2_MOUSE_CMD_SET_DEFAULTS;
+	ps2mouse_sendCommand(&command, 1); // This also enables interrupts
+	command = PS2_MOUSE_CMD_DISABLE;
+	ps2mouse_sendCommand(&command, 1); // This also enables interrupts
+    command = PS2_MOUSE_CMD_READID;
+	ps2mouse_sendCommand(&command, 1); // This also enables interrupts
+	ps2mouse_sendCommand(&command, 1); // This also enables interrupts
+	ps2mouse_sendCommand(&command, 1); // This also enables interrupts
+	ps2mouse_sendCommand(&command, 1); // This also enables interrupts
+	ps2mouse_sendCommand(&command, 1); // This also enables interrupts
+	ps2mouse_sendCommand(&command, 1); // This also enables interrupts
+*/
 	while(1);
 
     return 0;
