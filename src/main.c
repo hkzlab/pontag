@@ -6,6 +6,7 @@
 #include <avr/interrupt.h>
 
 #include "ps2_mouse.h"
+#include "ps22ser.h"
 
 #include "uart.h"
 
@@ -13,6 +14,10 @@
 #include "ps2_proto.h"
 
 int main(void) {
+    uint8_t serial_pkt_buf[4]; // Buffer for serial packets
+    uint8_t converter_status; // Converter status
+    uint8_t converter_result;
+
     // Set the pull-up resistor to all unused I/O ...
 	DDRB &= 0x03;
 	PORTB |= 0xFC;
@@ -30,6 +35,8 @@ int main(void) {
 	stdout = &uart_output;
 	stdin  = &uart_input;
 	
+    converter_status = 0; // Clear the status
+
     _delay_ms(50);
 
     fprintf(stdout, "Now waiting...");
@@ -45,8 +52,9 @@ int main(void) {
         if(cur_counter != buf_counter) {
             uint8_t *buf = (uint8_t*)ps2mouse_getBuffer();
             buf_counter = cur_counter;
+            converter_result = ps2bufToSer(buf, serial_pkt_buf, &converter_status);
 
-            fprintf(stdout, "%.2X %.2X %.2X\n", buf[0], buf[1], buf[2]);
+            fprintf(stdout, "%.2X %.2X %.2X %.2X - %.2X\n", serial_pkt_buf[0], serial_pkt_buf[1], serial_pkt_buf[2], serial_pkt_buf[3], converter_result);
         }
     }
 
