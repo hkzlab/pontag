@@ -19,7 +19,7 @@
  * PD2 - PS/2 Clock port
  * PD1 - Serial TX
  * PD0 - Serial RX (unused?)
- * PD3 - Serial DTR input (used to send hello packet)
+ * PD3 - Serial RTS input (used to send hello packet)
  */
 
 static volatile uint8_t ser_hello_toggle;
@@ -38,8 +38,8 @@ int main(void) {
 	DDRC &= 0xC0;
 	PORTC |= 0x3F;
 
-	DDRD &= 0x0E;
-	PORTD |= 0xF0;
+	DDRD &= 0x06; // Make sure PD0,PD3-7 are input
+	PORTD |= 0xF0; // Enable pullup resistors on PD4-7
 
 	// Initialize serial port for output
 	uart_init();
@@ -94,7 +94,7 @@ void setup_interrupts(void) {
 }
 
 ISR(INT1_vect) { // Manage INT1
-    // TODO: Should we check for the signal to rise or to drop or what?
-    ser_hello_toggle = 1; // Request the mouse to send its hello packet
+    // Check for PD3 (RTS) to rise
+    if (PIND & 0x08) ser_hello_toggle = 1; // Request the mouse to send its hello packet
 }
 
