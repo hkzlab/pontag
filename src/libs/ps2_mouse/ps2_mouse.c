@@ -125,7 +125,7 @@ void ps2mouse_init(volatile uint8_t *dataPort, volatile uint8_t *dataDir, volati
 #elif defined (__AVR_ATtiny4313__)
 	GIMSK |= (1 << INT0);
 #elif defined (__AVR_ATmega8A__)
-	GICR  |= (1 << INT0); // Enable INT1
+	GICR  |= (1 << INT0);
 #endif
 }
 
