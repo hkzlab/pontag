@@ -32,11 +32,11 @@ int main(void) {
     uint8_t converter_result;
 
     // Set the pull-up resistor to all unused I/O ...
-	DDRB &= 0x03;
-	PORTB |= 0xFC;
+	DDRB &= 0x03; // PB2-7 as input...
+	PORTB |= 0xFC; // ...and with pullup high
 	
-	DDRC &= 0xC0;
-	PORTC |= 0x3F;
+	DDRC &= 0xC0; // PC0-5 as input...
+	PORTC |= 0x3F; // ...and with pull-up high
 
 	DDRD &= 0x06; // Make sure PD0,PD3-7 are input
 	PORTD |= 0xF0; // Enable pullup resistors on PD4-7
@@ -65,6 +65,7 @@ int main(void) {
 
     while(1) {
         if(ser_hello_toggle) {
+            __delay_ms(SER_HELLO_DELAY_MS);
             ser_hello_toggle = 0;
             uart_putchar(SER_HELLO_PKT, NULL);
         } else { // Normal run
