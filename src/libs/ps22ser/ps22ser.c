@@ -30,25 +30,25 @@ uint8_t ps2bufToSer(const uint8_t *src, uint8_t *dst, uint8_t *state) {
 
     // TEST 1 - Ignore the least significant bit
     // Movement - First byte
-    dst[0] |= (src[0] & 0x20) >> 2; // Y7
-    dst[0] |= (src[0] & 0x10) >> 3; // X7
-    dst[0] |= (src[2] & 0x80) >> 5; // Y6
-    dst[0] |= (src[1] & 0x80) >> 7; // X6
+    //dst[0] |= (src[0] & 0x20) >> 2; // Y7
+    //dst[0] |= (src[0] & 0x10) >> 3; // X7
+    //dst[0] |= (src[2] & 0x80) >> 5; // Y6
+    //dst[0] |= (src[1] & 0x80) >> 7; // X6
     // Movement - Second byte
-    dst[1] |= (src[1] & 0x7E) >> 1; // X5-X0
+    //dst[1] |= (src[1] & 0x7E) >> 1; // X5-X0
     // Movement - Third byte
-    dst[2] |= (src[2] & 0x7E) >> 1; // Y6-Y0
+    //dst[2] |= (src[2] & 0x7E) >> 1; // Y6-Y0
 
     // TEST 2 - Ignore the most significant bit
     // Movement - First byte
-    //dst[0] |= (src[2] & 0x40) >> 4; // Y6
-    //dst[0] |= (src[1] & 0x40) >> 6; // X6
-    //dst[0] |= ((src[0] & 0x20) ? 0x08 : 0x00); // Y7 - Sign
-    //dst[0] |= ((src[0] & 0x10) ? 0x04 : 0x00); // X7 - Sign
+    dst[0] |= (src[2] & 0x40) >> 4; // Y6
+    dst[0] |= (src[1] & 0x40) >> 6; // X6
+    dst[0] |= ((src[0] & 0x20) ? 0x08 : 0x00); // Y7 - Sign
+    dst[0] |= ((src[0] & 0x10) ? 0x02 : 0x00); // X7 - Sign
     // Movement - Second byte
-    //dst[1] |= (src[1] & 0x3F) >> 0; // X5-X0
+    dst[1] |= (src[1] & 0x3F) >> 0; // X5-X0
     // Movement - Third byte
-    //dst[2] |= (src[2] & 0x3F) >> 0; // Y6-Y0
+    dst[2] |= (src[2] & 0x3F) >> 0; // Y6-Y0
 
     // Let's ignore the overflow indicators for now
 

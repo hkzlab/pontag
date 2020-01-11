@@ -52,6 +52,7 @@ int main(void) {
 
     _delay_ms(50);
 
+
     //fprintf(stdout, "Now waiting...");
 
 	ps2mouse_init(&PORTB, &DDRB, &PINB, 1);
@@ -59,10 +60,13 @@ int main(void) {
 
 	ps2mouse_reset(); // This also enables interrupts
 
+    setup_interrupts();
+    
     uint8_t buf_counter = 0;
     uint8_t cur_counter = 0;
     uint8_t *ps2_buf;
 
+    //while(1) { uart_putchar(SER_HELLO_PKT, NULL); _delay_ms(500);};
     while(1) {
         if(ser_hello_toggle) {
            _delay_ms(SER_HELLO_DELAY_MS);
@@ -74,8 +78,12 @@ int main(void) {
                 ps2_buf = (uint8_t*)ps2mouse_getBuffer();
                 buf_counter = cur_counter;
                 converter_result = ps2bufToSer(ps2_buf, serial_pkt_buf, &converter_status);
-
-                fprintf(stdout, "%.2X %.2X %.2X %.2X - %.2X\n", serial_pkt_buf[0], serial_pkt_buf[1], serial_pkt_buf[2], serial_pkt_buf[3], converter_result);
+                
+            	uart_putchar(serial_pkt_buf[0], NULL);
+            	uart_putchar(serial_pkt_buf[1], NULL);
+            	uart_putchar(serial_pkt_buf[2], NULL);
+		
+		//fprintf(stdout, "%.2X %.2X %.2X %.2X - %.2X\n", serial_pkt_buf[0], serial_pkt_buf[1], serial_pkt_buf[2], serial_pkt_buf[3], converter_result);
             }
         }
     }
@@ -86,6 +94,8 @@ int main(void) {
 void setup_interrupts(void) {
     // Enable INT1
 #if defined (__AVR_ATmega128__) || defined (__AVR_ATmega328P__)
+	EICRA |= (1 << ISC10);
+	EICRA &= ~(1 << ISC11);
 	EIMSK |= (1 << INT1);
 #elif defined (__AVR_ATtiny4313__)
 	GIMSK |= (1 << INT1);
@@ -96,6 +106,6 @@ void setup_interrupts(void) {
 
 ISR(INT1_vect) { // Manage INT1
     // Check for PD3 (RTS) to rise
-    if (PIND & 0x08) ser_hello_toggle = 1; // Request the mouse to send its hello packet
+    /*if (PIND & 0x08)*/ ser_hello_toggle = 1; // Request the mouse to send its hello packet
 }
 
