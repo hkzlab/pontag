@@ -65,7 +65,7 @@ int main(void) {
 
     while(1) {
         if(ser_hello_toggle) {
-           __delay_ms(SER_HELLO_DELAY_MS);
+           _delay_ms(SER_HELLO_DELAY_MS);
             ser_hello_toggle = 0;
             uart_putchar(SER_HELLO_PKT, NULL);
         } else { // Normal run
