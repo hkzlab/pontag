@@ -24,7 +24,7 @@
 
 static volatile uint8_t ser_hello_toggle;
 
-void setup_interrupts(void);
+void setup_detection_interrupt(void);
 
 int main(void) {
     uint8_t serial_pkt_buf[4]; // Buffer for serial packets
@@ -58,9 +58,10 @@ int main(void) {
 	ps2mouse_init(&PORTB, &DDRB, &PINB, 1);
     _delay_ms(100);
 
+    setup_detection_interrupt();
+
 	ps2mouse_reset(); // This also enables interrupts
 
-    setup_interrupts();
     
     uint8_t buf_counter = 0;
     uint8_t cur_counter = 0;
@@ -91,12 +92,14 @@ int main(void) {
     return 0;
 }
 
-void setup_interrupts(void) {
+void setup_detection_interrupt(void) {
     // Enable INT1
 #if defined (__AVR_ATmega128__) || defined (__AVR_ATmega328P__)
+	// Toggle when the logical level changes
 	EICRA |= (1 << ISC10);
 	EICRA &= ~(1 << ISC11);
 	EIMSK |= (1 << INT1);
+	// TODO: Implement for the other MCU types
 #elif defined (__AVR_ATtiny4313__)
 	GIMSK |= (1 << INT1);
 #elif defined (__AVR_ATmega8A__)
@@ -105,6 +108,7 @@ void setup_interrupts(void) {
 }
 
 ISR(INT1_vect) { // Manage INT1
+	uart_putchar('D', NULL);
     // Check for PD3 (RTS) to rise
     /*if (PIND & 0x08)*/ ser_hello_toggle = 1; // Request the mouse to send its hello packet
 }
