@@ -13,7 +13,7 @@
 #include "main.h"
 #include "ps2_proto.h"
 
-/* 
+/*
  * Default connections for 328p
  * PB1 - PS/2 Data port
  * PD2 - PS/2 Clock port
@@ -32,19 +32,19 @@ int main(void) {
     uint8_t converter_result;
 
     // Set the pull-up resistor to all unused I/O ...
-	DDRB &= 0x03; // PB2-7 as input...
-	PORTB |= 0xFC; // ...and with pullup high
-	
-	DDRC &= 0xC0; // PC0-5 as input...
-	PORTC |= 0x3F; // ...and with pull-up high
+    DDRB &= 0x03; // PB2-7 as input...
+    PORTB |= 0xFC; // ...and with pullup high
 
-	DDRD &= 0x06; // Make sure PD0,PD3-7 are input
-	PORTD |= 0xF0; // Enable pullup resistors on PD4-7
+    DDRC &= 0xC0; // PC0-5 as input...
+    PORTC |= 0x3F; // ...and with pull-up high
 
-	// Initialize serial port for output
-	uart_init();
-	stdout = &uart_output;
-	stdin  = &uart_input;
+    DDRD &= 0x06; // Make sure PD0,PD3-7 are input
+    PORTD |= 0xF0; // Enable pullup resistors on PD4-7
+
+    // Initialize serial port for output
+    uart_init();
+    stdout = &uart_output;
+    stdin  = &uart_input;
 
     // Clear some vars
     converter_status = 0;
@@ -55,14 +55,14 @@ int main(void) {
 
     //fprintf(stdout, "Now waiting...");
 
-	ps2mouse_init(&PORTB, &DDRB, &PINB, 1);
+    ps2mouse_init(&PORTB, &DDRB, &PINB, 1);
     _delay_ms(100);
 
     setup_detection_interrupt();
 
-	ps2mouse_reset(); // This also enables interrupts
+    ps2mouse_reset(); // This also enables interrupts
 
-    
+
     uint8_t buf_counter = 0;
     uint8_t cur_counter = 0;
     uint8_t *ps2_buf;
@@ -70,7 +70,7 @@ int main(void) {
     //while(1) { uart_putchar(SER_HELLO_PKT, NULL); _delay_ms(500);};
     while(1) {
         if(ser_hello_toggle) {
-           _delay_ms(SER_HELLO_DELAY_MS);
+            _delay_ms(SER_HELLO_DELAY_MS);
             ser_hello_toggle = 0;
             uart_putchar(SER_HELLO_PKT, NULL);
         } else { // Normal run
@@ -79,12 +79,12 @@ int main(void) {
                 ps2_buf = (uint8_t*)ps2mouse_getBuffer();
                 buf_counter = cur_counter;
                 converter_result = ps2bufToSer(ps2_buf, serial_pkt_buf, &converter_status);
-                
-            	uart_putchar(serial_pkt_buf[0], NULL);
-            	uart_putchar(serial_pkt_buf[1], NULL);
-            	uart_putchar(serial_pkt_buf[2], NULL);
-		
-		//fprintf(stdout, "%.2X %.2X %.2X %.2X - %.2X\n", serial_pkt_buf[0], serial_pkt_buf[1], serial_pkt_buf[2], serial_pkt_buf[3], converter_result);
+
+                uart_putchar(serial_pkt_buf[0], NULL);
+                uart_putchar(serial_pkt_buf[1], NULL);
+                uart_putchar(serial_pkt_buf[2], NULL);
+
+                //fprintf(stdout, "%.2X %.2X %.2X %.2X - %.2X\n", serial_pkt_buf[0], serial_pkt_buf[1], serial_pkt_buf[2], serial_pkt_buf[3], converter_result);
             }
         }
     }
@@ -95,20 +95,20 @@ int main(void) {
 void setup_detection_interrupt(void) {
     // Enable INT1
 #if defined (__AVR_ATmega128__) || defined (__AVR_ATmega328P__)
-	// Toggle when the logical level changes
-	EICRA |= (1 << ISC10);
-	EICRA &= ~(1 << ISC11);
-	EIMSK |= (1 << INT1);
-	// TODO: Implement for the other MCU types
+    // Toggle when the logical level changes
+    EICRA |= (1 << ISC10);
+    EICRA &= ~(1 << ISC11);
+    EIMSK |= (1 << INT1);
+    // TODO: Implement for the other MCU types
 #elif defined (__AVR_ATtiny4313__)
-	GIMSK |= (1 << INT1);
+    GIMSK |= (1 << INT1);
 #elif defined (__AVR_ATmega8A__)
-	GICR  |= (1 << INT1); // Enable INT1
+    GICR  |= (1 << INT1); // Enable INT1
 #endif
 }
 
 ISR(INT1_vect) { // Manage INT1
-	uart_putchar('D', NULL);
+    uart_putchar('D', NULL);
     // Check for PD3 (RTS) to rise
     /*if (PIND & 0x08)*/ ser_hello_toggle = 1; // Request the mouse to send its hello packet
 }

@@ -3,7 +3,7 @@
 
 #ifndef BAUD
 #define BAUD 1200
-#endif 
+#endif
 
 #include <util/setbaud.h>
 
@@ -75,13 +75,13 @@ void uart_init(void) {
     UART_UBRRL = UBRRL_VALUE;
 
 #if USE_2X
-	UART_UCSRA |= (1 << UART_U2X);
+    UART_UCSRA |= (1 << UART_U2X);
 #else
-	UART_UCSRA &= ~(1 << UART_U2X);
+    UART_UCSRA &= ~(1 << UART_U2X);
 #endif
 
-    UART_UCSRC = (1 << UART_UCSZ1) | (1 << UART_UCSZ0); /* 8-bit data */ 
-    UART_UCSRB = (1 << UART_RXEN) | (1 << UART_TXEN);   /* Enable RX and TX */    
+    UART_UCSRC = (1 << UART_UCSZ1) | (1 << UART_UCSZ0); /* 8-bit data */
+    UART_UCSRB = (1 << UART_RXEN) | (1 << UART_TXEN);   /* Enable RX and TX */
 }
 
 int uart_putchar(char c, FILE *stream) {
