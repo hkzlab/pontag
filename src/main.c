@@ -22,8 +22,6 @@
  * PD3 - Serial RTS input (used to send hello packet)
  */
 
-static volatile uint8_t ser_hello_toggle;
-
 void setup_detection_interrupt(void);
 
 int main(void) {
@@ -64,7 +62,7 @@ int main(void) {
     DDRB &= 0x03; // PB2-7 as input...
     PORTB |= 0xFC; // ...and with pull-up
 
-#if defined (__AVR_ATmega328P__) || defined (__AVR_ATmega8A__)
+#if defined (__AVR_ATmega8A__) || defined (__AVR_ATmega328P__)
     DDRC &= 0xC0; // PC0-5 as input...
     PORTC |= 0x3F; // ...and with pull-up
 #endif
@@ -79,7 +77,6 @@ int main(void) {
 
     // Clear some vars
     converter_status = 0;
-    ser_hello_toggle = 0;
 
     _delay_ms(50);
 
@@ -93,18 +90,11 @@ int main(void) {
 
     ps2mouse_reset(); // This also enables interrupts
 
-
     uint8_t buf_counter = 0;
     uint8_t cur_counter = 0;
     uint8_t *ps2_buf;
 
-    //while(1) { uart_putchar(SER_HELLO_PKT, NULL); _delay_ms(500);};
     while(1) {
-        if(ser_hello_toggle) {
-            _delay_ms(SER_HELLO_DELAY_MS);
-            ser_hello_toggle = 0;
-            uart_putchar(SER_HELLO_PKT, NULL);
-        } else { // Normal run
             cur_counter = ps2mouse_getBufCounter();
             if(cur_counter != buf_counter) {
                 ps2_buf = (uint8_t*)ps2mouse_getBuffer();
@@ -118,9 +108,7 @@ int main(void) {
                     uart_putchar(serial_pkt_buf[2], NULL);
                     if(converter_result & 0x02) uart_putchar(serial_pkt_buf[3], NULL); // Send the fourth byte, according to the Logitech serial protocol
                 }
-                //fprintf(stdout, "%.2X %.2X %.2X %.2X - %.2X\n", serial_pkt_buf[0], serial_pkt_buf[1], serial_pkt_buf[2], serial_pkt_buf[3], converter_result);
             }
-        }
     }
 
     return 0;
@@ -129,9 +117,9 @@ int main(void) {
 void setup_detection_interrupt(void) {
     // Enable INT1, and have it toggle at any logical level change
 #if defined (__AVR_ATmega128__) || defined (__AVR_ATmega328P__)
-    // Toggle when the logical level changes
+    // Toggle at the rising edge
     EICRA |= (1 << ISC10);
-    EICRA &= ~(1 << ISC11);
+    EICRA |= (1 << ISC11);
     EIMSK |= (1 << INT1);
 #elif defined (__AVR_ATtiny4313__)
     MCUCR |= (1 << ISC10);
@@ -139,14 +127,13 @@ void setup_detection_interrupt(void) {
     GIMSK |= (1 << INT1);
 #elif defined (__AVR_ATmega8A__)
     MCUCR |= (1 << ISC10);
-    MCUCR &= ~(1 << ISC11)
+    MCUCR &= ~(1 << ISC11);
     GICR  |= (1 << INT1);
 #endif
 }
 
 ISR(INT1_vect) { // Manage INT1
-    uart_putchar('D', NULL);
-    // Check for PD3 (RTS) to rise
-    /*if (PIND & 0x08)*/ ser_hello_toggle = 1; // Request the mouse to send its hello packet
+    _delay_ms(150);
+    uart_putchar(SER_HELLO_PKT, NULL);
 }
 
