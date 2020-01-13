@@ -177,14 +177,13 @@ void ps2mouse_sendCommand(uint8_t *command, uint8_t length) {
     // Iterate over all the data bytes we have to send
     for (uint8_t idx = 0; idx < length; idx++) {
         // Bring the clock line LOW for at least 100 microseconds
-        *cDir |= (1 << cPNum); // KB Clock line set as output
-        *dDir |= (1 << dPNum); // KB Data line set as output
-
         *cPort &= ~(1 << cPNum); // bring clock line LOW
-        _delay_us(100);
+        *cDir |= (1 << cPNum); // KB Clock line set as output
+        _delay_us(130);
 
         // Apply a request-to-send by bringing data line low
         *dPort &= ~(1 << dPNum); // Bring data line LOW
+        *dDir |= (1 << dPNum); // KB Data line set as output
 
         // Release the clock port (set it to floating and give control back)
         *cDir &= ~(1 << cPNum); // KB Clock line set as input
@@ -204,8 +203,8 @@ void ps2mouse_sendCommand(uint8_t *command, uint8_t length) {
                 if (!parity_check) parity_check = 1;
                 else parity_check = 0;
             } else {
-                *dDir |= (1 << dPNum); // KB Data line set as output
                 *dPort &= ~(1 << dPNum); // Force it low
+                *dDir |= (1 << dPNum); // KB Data line set as output
             }
 
             cur_data >>= 1;
@@ -220,8 +219,8 @@ void ps2mouse_sendCommand(uint8_t *command, uint8_t length) {
             *dDir &= ~(1 << dPNum); // Force the line as floating again
             *dPort |= (1 << dPNum); // Pull-up resistor on data line
         } else {
-            *dDir |= (1 << dPNum); // KB Data line set as output
             *dPort &= ~(1 << dPNum); // And force it low
+            *dDir |= (1 << dPNum); // KB Data line set as output
         }
         // Wait for the device to bring the clock high and then low
         while (!(*cPin & (1 << cPNum)));
