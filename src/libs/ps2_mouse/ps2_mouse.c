@@ -39,17 +39,11 @@ static volatile uint8_t data_buf_idx = 0;
 static volatile uint8_t buf_enabled = 0;
 static volatile uint8_t bak_data_buf_counter = 0;
 
-void ps2_dumb_print(uint8_t *code, uint8_t count);
-
 static volatile uint8_t ps2_data, ps2_flag;
 
 int parity_check(uint8_t flag_i, uint8_t data_i);
 void pushData(uint8_t data);
 void buf_clear(void);
-
-void ps2_dumb_print(uint8_t *code, uint8_t count) {
-    printf("%.2X %.2X %.2X\n", code[0], code[1], code[2]);
-}
 
 int parity_check(uint8_t flag_i, uint8_t data_i) {
     uint8_t result = 1;
@@ -90,12 +84,10 @@ void ps2mouse_init(volatile uint8_t *dataPort, volatile uint8_t *dataDir, volati
 #endif
 
     // Prepare data port
-    *dDir &= ~(1 << dPNum); // KB Data line set as input
-    *dPort |= (1 << dPNum); // Pull-up resistor on data line
+    *dDir &= ~(1 << dPNum); // Release KB Data
 
     // Prepare clock port
-    *cDir &= ~(1 << cPNum); // KB Clock line set as input
-    *cPort |= (1 << cPNum); // Pull-up resistor on clock line
+    *cDir &= ~(1 << cPNum); // Release KB Clock line
 
     // See http://www.avr-tutorials.com/interrupts/The-AVR-8-Bits-Microcontrollers-External-Interrupts
     // And http://www.atmel.com/images/doc2543.pdf
@@ -134,11 +126,11 @@ void ps2mouse_reset() {
 
     uint8_t command = PS2_MOUSE_CMD_RESET;
     ps2mouse_sendCommand(&command, 1); // This also enables interrupts
-    _delay_ms(100);
+    _delay_ms(250);
 
     command = PS2_MOUSE_CMD_SET_DEFAULTS;
     ps2mouse_sendCommand(&command, 1); // This also enables interrupts
-    _delay_ms(100);
+    _delay_ms(250);
 
     command = PS2_MOUSE_CMD_ENABLE;
     ps2mouse_sendCommand(&command, 1); // This also enables interrupts
@@ -177,17 +169,14 @@ void ps2mouse_sendCommand(uint8_t *command, uint8_t length) {
     // Iterate over all the data bytes we have to send
     for (uint8_t idx = 0; idx < length; idx++) {
         // Bring the clock line LOW for at least 100 microseconds
-        *cPort &= ~(1 << cPNum); // bring clock line LOW
-        *cDir |= (1 << cPNum); // KB Clock line set as output
-        _delay_us(130);
+        *cDir |= (1 << cPNum); // Set Clock as output (low)
+        _delay_us(110);
 
         // Apply a request-to-send by bringing data line low
-        *dPort &= ~(1 << dPNum); // Bring data line LOW
-        *dDir |= (1 << dPNum); // KB Data line set as output
+        *dDir |= (1 << dPNum); // Set Data as output (low)
 
         // Release the clock port (set it to floating and give control back)
-        *cDir &= ~(1 << cPNum); // KB Clock line set as input
-        *cPort |= (1 << cPNum); // Pull-up resistor on clock line
+        *cDir &= ~(1 << cPNum); // Release Clock line (high)
 
         // And wait for the device to bring clock line LOW
         while (*cPin & (1 << cPNum));
@@ -196,39 +185,34 @@ void ps2mouse_sendCommand(uint8_t *command, uint8_t length) {
         cur_data = command[idx];
         parity_check = 1;
         for (uint8_t bit_idx = 0; bit_idx < 8; bit_idx++) {
-            if (cur_data & 0x01) {  // Set the line to floating with pullup
-                *dDir &= ~(1 << dPNum); // KB Data line set as input
-                *dPort |= (1 << dPNum); // Pull-up resistor on data line
+            if (cur_data & 0x01) { // High
+                *dDir &= ~(1 << dPNum); // Release Data line
 
                 if (!parity_check) parity_check = 1;
                 else parity_check = 0;
-            } else {
-                *dPort &= ~(1 << dPNum); // Force it low
-                *dDir |= (1 << dPNum); // KB Data line set as output
+            } else { // Low
+                *dDir |= (1 << dPNum); // Data line set as output (low)
             }
 
             cur_data >>= 1;
 
-            // Wait for the device to bring the clock high and then low
+            // Wait for the device to bring the Clock high and then low
             while (!(*cPin & (1 << cPNum)));
             while (*cPin & (1 << cPNum));
         }
 
         // Send the parity bit
         if (parity_check) {
-            *dDir &= ~(1 << dPNum); // Force the line as floating again
-            *dPort |= (1 << dPNum); // Pull-up resistor on data line
+            *dDir &= ~(1 << dPNum); // Release Data line (will pull high)
         } else {
-            *dPort &= ~(1 << dPNum); // And force it low
-            *dDir |= (1 << dPNum); // KB Data line set as output
+            *dDir |= (1 << dPNum); // Data line set as output (low)
         }
         // Wait for the device to bring the clock high and then low
         while (!(*cPin & (1 << cPNum)));
         while (*cPin & (1 << cPNum));
 
         // Parity sent, now set the data high (floating)
-        *dDir &= ~(1 << dPNum); // KB Data line set as input
-        *dPort |= (1 << dPNum); // Pull-up resistor on data line
+        *dDir &= ~(1 << dPNum); // Release Data
 
         // Wait for the device to bring the data low
         while (*dPin & (1 << dPNum));
@@ -239,17 +223,13 @@ void ps2mouse_sendCommand(uint8_t *command, uint8_t length) {
         while (!(*cPin & (1 << cPNum)));
         // Wait for the data line to get high
         while (!(*dPin & (1 << dPNum)));
-
-        //_delay_ms(15); // Wait for the device to be ready again
     }
 
     // Prepare data port
-    *dDir &= ~(1 << dPNum); // KB Data line set as input
-    *dPort |= (1 << dPNum); // Pull-up resistor on data line
+    *dDir &= ~(1 << dPNum); // Release Data line
 
     // Prepare clock port
-    *cDir &= ~(1 << cPNum); // KB Clock line set as input
-    *cPort |= (1 << cPNum); // Pull-up resistor on clock line
+    *cDir &= ~(1 << cPNum); // Release Clock line
 
     sei();
 }

@@ -59,15 +59,15 @@ int main(void) {
      */
 
     // Set the pull-up resistor to all unused I/O ...
-    DDRB &= 0x03; // PB2-7 as input...
-    PORTB |= 0xFC; // ...and with pull-up
+    DDRB &= 0x01; // PB1-7 as input...
+    PORTB = 0xFC; // ...and with pull-up on 2-7
 
 #if defined (__AVR_ATmega8A__) || defined (__AVR_ATmega328P__)
     DDRC &= 0xC0; // PC0-5 as input...
-    PORTC |= 0x3F; // ...and with pull-up
+    PORTC = 0x3F; // ...and with pull-up
 #endif
 
-    DDRD &= 0x06; // PD0,PD3-7 as input...
+    DDRD &= 0x02; // PD0,PD2-7 as input...
     PORTD |= 0xF0; // ...but enable pullup only on PD4-7
 
     // Initialize serial port
@@ -80,8 +80,6 @@ int main(void) {
 
     _delay_ms(50);
 
-
-    //fprintf(stdout, "Now waiting...");
 
     ps2mouse_init(&PORTB, &DDRB, &PINB, 1);
     _delay_ms(100);
