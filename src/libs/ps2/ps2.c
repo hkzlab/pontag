@@ -1,12 +1,11 @@
-///\file
-///\brief PS/2 protocol implementation
-///
-/// This implementation is entirely interrupt-driven so all comms happens in background.
-/// Clock is tied to INT0 pin and events are handled in INT0 ISR handler. 
-///
-/// Events not triggered by clock (end of transmission, transmission request, watchdog,
-/// error recovery) use Timer0. Watch out how state changes in different handlers.
-///
+// PS/2 protocol implementation
+//
+// This implementation is entirely interrupt-driven so all comms happens in background.
+// Clock is tied to INT0 pin and events are handled in INT0 ISR handler. 
+//
+// Events not triggered by clock (end of transmission, transmission request, watchdog,
+// error recovery) use Timer0. Watch out how state changes in different handlers.
+//
 
 #include <inttypes.h>
 #include <avr/io.h>
