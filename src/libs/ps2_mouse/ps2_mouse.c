@@ -44,6 +44,7 @@ static volatile uint8_t ps2_data, ps2_flag;
 int parity_check(uint8_t flag_i, uint8_t data_i);
 void pushData(uint8_t data);
 void buf_clear(void);
+void ps2_state_clear(void);
 
 int parity_check(uint8_t flag_i, uint8_t data_i) {
     uint8_t result = 1;
@@ -79,6 +80,20 @@ void ps2mouse_init(volatile uint8_t *dataPort, volatile uint8_t *dataDir, volati
     cDir = &DDRD;
     cPNum = 2; // PD2
 
+    // Release PS2 lines and set to interrupt on the falling edge
+    ps2_state_clear();
+
+    // Enable INT0
+#if defined (__AVR_ATmega328P__)
+    EIMSK |= (1 << INT0);
+#elif defined (__AVR_ATtiny4313__)
+    GIMSK |= (1 << INT0);
+#elif defined (__AVR_ATmega8A__)
+    GICR  |= (1 << INT0);
+#endif
+}
+
+void ps2_state_clear(void) {
     // Prepare data port
     *dDir &= ~(1 << dPNum); // Release Data
 
@@ -91,46 +106,36 @@ void ps2mouse_init(volatile uint8_t *dataPort, volatile uint8_t *dataDir, volati
 #if defined (__AVR_ATmega328P__)
     EICRA &= ~((1 << ISC00) | (1 << ISC01));
     EICRA |= (1 << ISC01);  // Trigger interrupt at FALLING EDGE (INT0)
-    EIMSK |= (1 << INT0);
 #elif defined (__AVR_ATtiny4313__) || defined (__AVR_ATmega8A__)
     MCUCR &= ~((1 << ISC00) | (1 << ISC01));
     MCUCR |= (1 << ISC01);  // Trigger interrupt at FALLING EDGE (INT0)
 #endif
-
-    // I suspect this to be totally useless...
-    //PCMSK |= (1<<PIND2);	// Enable pin change on INT0 (why is this required?)
-
     // Clear the fields used by the interrupt callback
     clock_edge = CLOCK_FALL;
     bitCount = PS2_START_BITCOUNT;
 
     ps2_data = 0;
     ps2_flag = 0;
-
-    // Enable INT0
-#if defined (__AVR_ATmega328P__)
-    EIMSK |= (1 << INT0);
-#elif defined (__AVR_ATtiny4313__)
-    GIMSK |= (1 << INT0);
-#elif defined (__AVR_ATmega8A__)
-    GICR  |= (1 << INT0);
-#endif
 }
 
 void ps2mouse_reset() {
     buf_enabled = 0;
 
-    uint8_t command = PS2_MOUSE_CMD_RESET;
+    uint8_t command = PS2_MOUSE_CMD_DISABLE;
     ps2mouse_sendCommand(&command, 1); // This also enables interrupts
-    _delay_ms(250);
+    _delay_ms(25);
+    
+    command = PS2_MOUSE_CMD_RESET;
+    ps2mouse_sendCommand(&command, 1); // This also enables interrupts
+    _delay_ms(25);
 
     command = PS2_MOUSE_CMD_SET_DEFAULTS;
     ps2mouse_sendCommand(&command, 1); // This also enables interrupts
-    _delay_ms(250);
+    _delay_ms(25);
 
     command = PS2_MOUSE_CMD_ENABLE;
     ps2mouse_sendCommand(&command, 1); // This also enables interrupts
-    _delay_ms(250);
+    _delay_ms(25);
     buf_clear();
     buf_enabled = 1; // Start accepting data
 }
@@ -221,11 +226,8 @@ void ps2mouse_sendCommand(uint8_t *command, uint8_t length) {
         while (!(*dPin & (1 << dPNum)));
     }
 
-    // Prepare data port
-    *dDir &= ~(1 << dPNum); // Release Data line
-
-    // Prepare clock port
-    *cDir &= ~(1 << cPNum); // Release Clock line
+    // Clear the state for PS/2 communication
+    ps2_state_clear();
 
     sei();
 }
