@@ -44,7 +44,8 @@ FORMAT = ihex
 TARGET = out/pontag
 
 # List C source files here. (C dependencies are automatically generated.)
-SRC = src/main.c src/libs/ps2/ps2.c src/libs/ioconfig/ioconfig.c src/libs/uart/uart.c src/libs/ps22ser/ps22ser.c
+#SRC = src/main.c src/libs/ps2/ps2.c src/libs/ioconfig/ioconfig.c src/libs/uart/uart.c src/libs/ps22ser/ps22ser.c
+SRC = src/main.c src/libs/ioconfig/ioconfig.c src/libs/uart/uart.c src/libs/ps22ser/ps22ser.c
 
 # List Assembler source files here.
 #     Make them always end in a capital .S.  Files ending in a lowercase .s

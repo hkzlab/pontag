@@ -6,22 +6,14 @@
 #include <util/delay.h>
 #include <avr/interrupt.h>
 
-#include "ps2_mouse.h"
+#include "ioconfig.h"
+#include "ps2.h"
 #include "ps22ser.h"
 
 #include "uart.h"
 
 #include "main.h"
 #include "ps2_proto.h"
-
-/*
- * Default connections for 328p
- * PB1 - PS/2 Data port
- * PD2 - PS/2 Clock port
- * PD1 - Serial TX
- * PD0 - Serial RX (unused?)
- * PD3 - Serial RTS input (used to send hello packet)
- */
 
 void setup_detection_interrupt(void);
 
@@ -32,46 +24,8 @@ int main(void) {
 
     //wdt_enable(WDTO_2S); // Enable the watchdog to reset in 2 seconds...
 
-    /**
-     * We will do the following
-     * 1 - Set all unused I/O as input with pull-up enabled
-     * 2 - Setup the pins for the serial port: TX output, RX input (without pullup), RTS (INT1) as input, without pullup
-     * 3 - Setup the pins for PS/2 communication: CLOCK input with pullup, DATA input with pullup (will be managed by PS/2 code)
-     * 
-     * ATMega328p
-     * - UART RX : PD0
-     * - UART TX : PD1
-     * - UART RTS : PD3
-     * - PS/2 CLOCK : PD2 (external pullup)
-     * - PS/2 DATA : PB1 (external pullup)
-     * 
-     * ATMega 8a
-     * - UART RX : PD0
-     * - UART TX : PD1
-     * - UART RTS : PD3
-     * - PS/2 CLOCK : PD2 (external pullup)
-     * - PS/2 DATA : PB1 (external pullup)
-     * 
-     * ATTiny4313
-     * - UART RX : PD0
-     * - UART TX : PD1
-     * - UART RTS : PD3
-     * - PS/2 CLOCK : PD2 (external pullup)
-     * - PS/2 DATA : PB1 (external pullup)
-     * 
-     */
-
-    // Set the pull-up resistor to all unused I/O ...
-    DDRB &= 0x01; // PB1-7 as input...
-    PORTB |= 0xFC; // ...and with pull-up on 2-7
-
-#if defined (__AVR_ATmega8A__) || defined (__AVR_ATmega328P__)
-    DDRC &= 0xC0; // PC0-5 as input...
-    PORTC |= 0x3F; // ...and with pull-up
-#endif
-
-    DDRD &= 0x02; // PD0,PD2-7 as input...
-    PORTD |= 0xF0; // ...but enable pullup only on PD4-7
+    // Initialize the I/O 
+    io_init();
 
     // Initialize serial port
     uart_init();
