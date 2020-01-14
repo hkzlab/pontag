@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <avr/io.h>
+#include <avr/wdt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <util/delay.h>
@@ -28,6 +29,8 @@ int main(void) {
     uint8_t serial_pkt_buf[4]; // Buffer for serial packets
     uint8_t converter_status; // PS/2 -> Serial conversion state var, used to keep track of state during iteration
     uint8_t converter_result; // Instanteneous result of the conversion
+
+    wdt_enable(WDTO_4S); // Enable the watchdog to reset in 4 seconds...
 
     /**
      * We will do the following
@@ -93,6 +96,8 @@ int main(void) {
     uint8_t *ps2_buf;
 
     while(1) {
+	    wdt_reset(); // Kick the watchdog
+
             cur_counter = ps2mouse_getBufCounter();
             if(cur_counter != buf_counter) {
                 ps2_buf = (uint8_t*)ps2mouse_getBuffer();
