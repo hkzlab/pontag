@@ -159,6 +159,22 @@ volatile uint8_t *ps2mouse_getBuffer(void) {
     return bak_data_buf;
 }
 
+/*
+ * Host-to-Device PS/2 transmission
+ * 1. Bring CLOCK line low for at least 100uS
+ * 2. Bring DATA line low
+ * 3. Release CLOCK line
+ * 4. Wait for the device to bring CLOCK low
+ * 5. Set/Reset DATA line to send the first data bit
+ * 6. Wait for the device to bring CLOCK high
+ * 7. Wait for the device to bring CLOCK low
+ * 8. Repeat steps 5-7 for the other 7 data bits and the parity
+ * 9. Release DATA line
+ * 10. Wait for the device to bring DATA low
+ * 11. Wait for the device to bring CLOCK low
+ * 12. Wait for the device to release DATA and CLOCK (will go high)
+ */
+
 // See http://www.avrfreaks.net/index.php?name=PNphpBB2&file=viewtopic&t=134386
 void ps2mouse_sendCommand(uint8_t *command, uint8_t length) {
     uint8_t cur_data = 0;
@@ -189,8 +205,7 @@ void ps2mouse_sendCommand(uint8_t *command, uint8_t length) {
             if (cur_data & 0x01) { // High
                 *dDir &= ~(1 << dPNum); // Release Data line
 
-                if (!parity_check) parity_check = 1;
-                else parity_check = 0;
+		parity_check = !parity_check;
             } else { // Low
                 *dDir |= (1 << dPNum); // Data line set as output (low)
             }
@@ -203,11 +218,9 @@ void ps2mouse_sendCommand(uint8_t *command, uint8_t length) {
         }
 
         // Send the parity bit
-        if (parity_check) {
-            *dDir &= ~(1 << dPNum); // Release Data line (will pull high)
-        } else {
-            *dDir |= (1 << dPNum); // Data line set as output (low)
-        }
+        if (parity_check) *dDir &= ~(1 << dPNum); // Release Data line (will pull high)
+        else *dDir |= (1 << dPNum); // Data line set as output (low)
+
         // Wait for the device to bring the clock high and then low
         while (!(*cPin & (1 << cPNum)));
         while (*cPin & (1 << cPNum));
