@@ -84,10 +84,10 @@ void ps2mouse_init(volatile uint8_t *dataPort, volatile uint8_t *dataDir, volati
 #endif
 
     // Prepare data port
-    *dDir &= ~(1 << dPNum); // Release KB Data
+    *dDir &= ~(1 << dPNum); // Release Data
 
     // Prepare clock port
-    *cDir &= ~(1 << cPNum); // Release KB Clock line
+    *cDir &= ~(1 << cPNum); // Release Clock line
 
     // See http://www.avr-tutorials.com/interrupts/The-AVR-8-Bits-Microcontrollers-External-Interrupts
     // And http://www.atmel.com/images/doc2543.pdf
