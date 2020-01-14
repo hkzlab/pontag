@@ -30,7 +30,7 @@ int main(void) {
     uint8_t converter_status; // PS/2 -> Serial conversion state var, used to keep track of state during iteration
     uint8_t converter_result; // Instanteneous result of the conversion
 
-    wdt_enable(WDTO_4S); // Enable the watchdog to reset in 4 seconds...
+    wdt_enable(WDTO_2S); // Enable the watchdog to reset in 2 seconds...
 
     /**
      * We will do the following
@@ -83,13 +83,14 @@ int main(void) {
 
     _delay_ms(50);
 
+    wdt_reset(); // First watchdog kick
 
     ps2mouse_init(&PORTB, &DDRB, &PINB, 1);
     _delay_ms(100);
-
     setup_detection_interrupt();
-
     ps2mouse_reset(); // This also enables interrupts
+
+    wdt_reset(); // Another kick
 
     uint8_t buf_counter = 0;
     uint8_t cur_counter = 0;
