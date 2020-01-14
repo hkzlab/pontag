@@ -42,32 +42,32 @@ int main(void) {
      * - UART RX : PD0
      * - UART TX : PD1
      * - UART RTS : PD3
-     * - PS/2 CLOCK : PD2
-     * - PS/2 DATA : PB1
+     * - PS/2 CLOCK : PD2 (external pullup)
+     * - PS/2 DATA : PB1 (external pullup)
      * 
      * ATMega 8a
      * - UART RX : PD0
      * - UART TX : PD1
      * - UART RTS : PD3
-     * - PS/2 CLOCK : PD2
-     * - PS/2 DATA : PB1
+     * - PS/2 CLOCK : PD2 (external pullup)
+     * - PS/2 DATA : PB1 (external pullup)
      * 
      * ATTiny4313
      * - UART RX : PD0
      * - UART TX : PD1
      * - UART RTS : PD3
-     * - PS/2 CLOCK : PD2
-     * - PS/2 DATA : PB1
+     * - PS/2 CLOCK : PD2 (external pullup)
+     * - PS/2 DATA : PB1 (external pullup)
      * 
      */
 
     // Set the pull-up resistor to all unused I/O ...
     DDRB &= 0x01; // PB1-7 as input...
-    PORTB = 0xFC; // ...and with pull-up on 2-7
+    PORTB |= 0xFC; // ...and with pull-up on 2-7
 
 #if defined (__AVR_ATmega8A__) || defined (__AVR_ATmega328P__)
     DDRC &= 0xC0; // PC0-5 as input...
-    PORTC = 0x3F; // ...and with pull-up
+    PORTC |= 0x3F; // ...and with pull-up
 #endif
 
     DDRD &= 0x02; // PD0,PD2-7 as input...
@@ -81,12 +81,10 @@ int main(void) {
     // Clear some vars
     converter_status = 0;
 
-    _delay_ms(50);
-
-    wdt_reset(); // First watchdog kick
+    // First watchdog kick
+    wdt_reset(); 
 
     ps2mouse_init(&PORTB, &DDRB, &PINB, 1);
-    _delay_ms(100);
     setup_detection_interrupt();
     ps2mouse_reset(); // This also enables interrupts
 
