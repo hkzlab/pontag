@@ -121,21 +121,14 @@ void ps2_state_clear(void) {
 void ps2mouse_reset() {
     buf_enabled = 0;
 
-    uint8_t command = PS2_MOUSE_CMD_DISABLE;
-    ps2mouse_sendCommand(&command, 1); // This also enables interrupts
-    _delay_ms(25);
-    
-    command = PS2_MOUSE_CMD_RESET;
-    ps2mouse_sendCommand(&command, 1); // This also enables interrupts
-    _delay_ms(25);
-
-    command = PS2_MOUSE_CMD_SET_DEFAULTS;
-    ps2mouse_sendCommand(&command, 1); // This also enables interrupts
-    _delay_ms(25);
-
-    command = PS2_MOUSE_CMD_ENABLE;
-    ps2mouse_sendCommand(&command, 1); // This also enables interrupts
-    _delay_ms(25);
+    ps2mouse_sendCommand(PS2_MOUSE_CMD_DISABLE); // This also enables interrupts
+    _delay_ms(500);
+    ps2mouse_sendCommand(PS2_MOUSE_CMD_RESET); // This also enables interrupts
+    _delay_ms(500);
+    ps2mouse_sendCommand(PS2_MOUSE_CMD_SET_DEFAULTS); // This also enables interrupts
+    _delay_ms(500);
+    ps2mouse_sendCommand(PS2_MOUSE_CMD_ENABLE); // This also enables interrupts
+    _delay_ms(500);
     buf_clear();
     buf_enabled = 1; // Start accepting data
 }
@@ -176,46 +169,41 @@ volatile uint8_t *ps2mouse_getBuffer(void) {
  */
 
 // See http://www.avrfreaks.net/index.php?name=PNphpBB2&file=viewtopic&t=134386
-void ps2mouse_sendCommand(uint8_t *command, uint8_t length) {
-    uint8_t cur_data = 0;
+void ps2mouse_sendCommand(uint8_t command) {
     uint8_t parity_check;
 
     // Send host-to-device command...
     cli(); // Disable all interrupts in preparation to command sending
 
-    // Iterate over all the data bytes we have to send
-    for (uint8_t idx = 0; idx < length; idx++) {
-        // Bring the clock line LOW for at least 100 microseconds
-        *cDir |= (1 << cPNum); // Set Clock as output (low)
-        _delay_us(110);
+    // Bring the clock line LOW for at least 100 microseconds
+    *cDir |= (1 << cPNum); // Set Clock as output (low)
+    _delay_us(100);
 
-        // Apply a request-to-send by bringing data line low
-        *dDir |= (1 << dPNum); // Set Data as output (low)
+    // Apply a request-to-send by bringing data line low
+    *dDir |= (1 << dPNum); // Set Data as output (low)
 
-        // Release the clock port (set it to floating and give control back)
-        *cDir &= ~(1 << cPNum); // Release Clock line (high)
+    // Release the clock port (set it to floating and give control back)
+    *cDir &= ~(1 << cPNum); // Release Clock line (high)
 
-        // And wait for the device to bring clock line LOW
-        while (*cPin & (1 << cPNum));
+    // And wait for the device to bring clock line LOW
+    while (*cPin & (1 << cPNum));
 
-        // Now begin send the data bits...
-        cur_data = command[idx];
-        parity_check = 1;
-        for (uint8_t bit_idx = 0; bit_idx < 8; bit_idx++) {
-            if (cur_data & 0x01) { // High
-                *dDir &= ~(1 << dPNum); // Release Data line
+    // Now begin send the data bits...
+    parity_check = 1;
+    for (uint8_t bit_idx = 0; bit_idx < 8; bit_idx++) {
+        if (command & 0x01) { // High
+            *dDir &= ~(1 << dPNum); // Release Data line
 
-		parity_check = !parity_check;
-            } else { // Low
-                *dDir |= (1 << dPNum); // Data line set as output (low)
-            }
-
-            cur_data >>= 1;
-
-            // Wait for the device to bring the Clock high and then low
-            while (!(*cPin & (1 << cPNum)));
-            while (*cPin & (1 << cPNum));
+            parity_check = !parity_check;
+        } else { // Low
+            *dDir |= (1 << dPNum); // Data line set as output (low)
         }
+
+        command >>= 1;
+
+        // Wait for the device to bring the Clock high and then low
+        while (!(*cPin & (1 << cPNum)));
+        while (*cPin & (1 << cPNum));
 
         // Send the parity bit
         if (parity_check) *dDir &= ~(1 << dPNum); // Release Data line (will pull high)
