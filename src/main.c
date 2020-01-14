@@ -114,7 +114,7 @@ int main(void) {
 
 void setup_detection_interrupt(void) {
     // Enable INT1, and have it toggle at any logical level change
-#if defined (__AVR_ATmega128__) || defined (__AVR_ATmega328P__)
+#if defined (__AVR_ATmega328P__)
     // Toggle at the rising edge
     EICRA |= (1 << ISC10);
     EICRA |= (1 << ISC11);

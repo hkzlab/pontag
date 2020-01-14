@@ -77,11 +77,7 @@ void ps2mouse_init(volatile uint8_t *dataPort, volatile uint8_t *dataDir, volati
     cPort = &PORTD;
     cPin = &PIND;
     cDir = &DDRD;
-#if defined (__AVR_ATmega128__)
-    cPNum = 0; // PD0
-#elif defined (__AVR_ATtiny4313__) || defined (__AVR_ATmega328P__) || defined (__AVR_ATmega8A__)
     cPNum = 2; // PD2
-#endif
 
     // Prepare data port
     *dDir &= ~(1 << dPNum); // Release Data
@@ -92,7 +88,7 @@ void ps2mouse_init(volatile uint8_t *dataPort, volatile uint8_t *dataDir, volati
     // See http://www.avr-tutorials.com/interrupts/The-AVR-8-Bits-Microcontrollers-External-Interrupts
     // And http://www.atmel.com/images/doc2543.pdf
 
-#if defined (__AVR_ATmega128__) || defined (__AVR_ATmega328P__)
+#if defined (__AVR_ATmega328P__)
     EICRA &= ~((1 << ISC00) | (1 << ISC01));
     EICRA |= (1 << ISC01);  // Trigger interrupt at FALLING EDGE (INT0)
     EIMSK |= (1 << INT0);
@@ -112,7 +108,7 @@ void ps2mouse_init(volatile uint8_t *dataPort, volatile uint8_t *dataDir, volati
     ps2_flag = 0;
 
     // Enable INT0
-#if defined (__AVR_ATmega128__) || defined (__AVR_ATmega328P__)
+#if defined (__AVR_ATmega328P__)
     EIMSK |= (1 << INT0);
 #elif defined (__AVR_ATtiny4313__)
     GIMSK |= (1 << INT0);
@@ -258,7 +254,7 @@ ISR(INT0_vect) { // Manage INT0
         }
         clock_edge = CLOCK_RISE;			// Ready for rising edge.
 
-#if defined (__AVR_ATmega128__) || defined (__AVR_ATmega328P__)
+#if defined (__AVR_ATmega328P__)
         EICRA |= ((1 << ISC00) | (1 << ISC01)); // Setup INT0 for rising edge.
 #elif defined (__AVR_ATtiny4313__) || defined (__AVR_ATmega8A__)
         MCUCR |= ((1 << ISC00) | (1 << ISC01)); // Setup INT0 for rising edge.
@@ -278,7 +274,7 @@ ISR(INT0_vect) { // Manage INT0
         }
         clock_edge = CLOCK_FALL;		// Setup routine the next falling edge.
 
-#if defined (__AVR_ATmega128__) || defined (__AVR_ATmega328P__)
+#if defined (__AVR_ATmega328P__)
         EICRA &= ~((1 << ISC00) | (1 << ISC01));
         EICRA |= (1 << ISC01);  // Trigger interrupt at FALLING EDGE (INT0)
 #elif defined (__AVR_ATtiny4313__) || defined (__AVR_ATmega8A__)
