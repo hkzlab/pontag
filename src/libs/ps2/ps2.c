@@ -18,21 +18,21 @@
 
 #include "ps2.h"
 
-/// Read PS2 data into bit 7
-#define ps2_datin() ((PS2PIN & _BV(PS2DAT)) ? 0200 : 0)
+// Read PS2 data into bit 7
+#define ps2_datin() ((PS2PIN & _BV(PS2DAT)) ? 0x80 : 0x00)
 
-/// Read PS2 clk into bit 7
-#define ps2_clkin() ((PS2PIN & _BV(PS2CLK)) ? 0200 : 0)
+// Read PS2 clk into bit 7
+#define ps2_clkin() ((PS2PIN & _BV(PS2CLK)) ? 0x80 : 0x00)
 
 
-static volatile uint8_t state;                  ///< PS2 protocol state
+static volatile uint8_t state;                  // PS2 protocol state
 
-static volatile uint8_t recv_byte;              ///< Byte being received
-static volatile uint8_t rx_head;                ///< Buffer head offset
-static volatile uint8_t rx_tail;                ///< Buffer tail offset
-static volatile uint8_t rx_buf[PS2_RXBUF_LEN];  ///< Receive buffer
+static volatile uint8_t recv_byte;              // Byte being received
+static volatile uint8_t rx_head;                // Buffer head offset
+static volatile uint8_t rx_tail;                // Buffer tail offset
+static volatile uint8_t rx_buf[PS2_RXBUF_LEN];  // Receive buffer
 
-static volatile uint8_t tx_byte;                ///< Byte being transmitted
+static volatile uint8_t tx_byte;                // Byte being transmitted
 
 // internals for tx/rx bitbanging
 static volatile uint8_t bits = 0;
@@ -40,47 +40,57 @@ static volatile uint8_t parity;
 
 static volatile uint8_t waitcnt = 0;
 
-/// PS2 protocol states
+// PS2 protocol states
 enum _state {
-    IDLE = 0,           ///< Idle waiting
-    RX_DATA,            ///< Receiving data
-    RX_PARITY,          ///< Receiving parity bit
-    RX_STOP,            ///< Receiving stop bit
+    IDLE = 0,           // Idle waiting
+    RX_DATA,            // Receiving data
+    RX_PARITY,          // Receiving parity bit
+    RX_STOP,            // Receiving stop bit
+   
+    TX_REQ0,            // Requesting to send
+    TX_DATA,            // Transmitting data
+    TX_PARITY,          // Transmitting parity bit
+    TX_STOP,            // Transmitting stop bit
+    TX_ACK,             // Waiting ACK
+    TX_END,             // Waiting for TX end
     
-    TX_REQ0,            ///< Requesting to send
-    TX_DATA,            ///< Transmitting data
-    TX_PARITY,          ///< Transmitting parity bit
-    TX_STOP,            ///< Transmitting stop bit
-    TX_ACK,             ///< Waiting ACK
-    TX_END,             ///< Waiting for TX end
-    
-    ERROR = 255         ///< Error state
+    ERROR = 255         // Error state
 };
 
-void ps2_dir(uint8_t,uint8_t);      ///< Set busses direction (1 == in)
-void ps2_clk(uint8_t);              ///< Set clk
-void ps2_dat(uint8_t);              ///< Set dat
+void ps2_dir(uint8_t,uint8_t);      // Set busses direction (1 == in)
+void ps2_clk(uint8_t);              // Set clk
+void ps2_dat(uint8_t);              // Set dat
 
-uint8_t ps2_busy() { return state != IDLE; }
+uint8_t ps2_busy(void) { return state != IDLE; }
 
-void ps2_init() {
+void ps2_init(void) {
     state = IDLE;
     rx_head = 0;
     rx_tail = 0;
     ps2_enable_recv(0);
-    
-    MCUCR |= _BV(ISC01); // falling edge for INT00
+  
+    // Toggle INT0 at the falling edge
+#if defined (__AVR_ATmega328P__)
+    EICRA |= _BV(ISC10);
+#elif defined (__AVR_ATtiny4313__) || defined (__AVR_ATmega8A__)
+    MCUCR |= _BV(ISC01);
+#endif
+
+    // Disable the timer 0 interrupts
     TIMSK &= ~_BV(TOIE0);
 }
 
 /// Begin error recovery: disable reception and wait for timer interrupt
-void ps2_recover() {
+void ps2_recover(void) {
     if (state == ERROR) {
         ps2_enable_recv(0);
+#if defined (__AVR_ATmega8A__)
+	// This is developed for 8Mhz
         TCNT0 = 255-35; // approx 1ms
         TIMSK |= _BV(TOIE0);
-
         TCCR0 = 4;  // enable: clk/256
+#elif defined (__AVR_ATmega328P__)
+#endif
     }
 }
 
