@@ -84,9 +84,9 @@ int main(void) {
     // First watchdog kick
     //wdt_reset(); 
 
-    ps2mouse_init(&PORTB, &DDRB, &PINB, 1);
-    //setup_detection_interrupt();
-    ps2mouse_reset(); // This also enables interrupts
+    //ps2mouse_init(&PORTB, &DDRB, &PINB, 1);
+    setup_detection_interrupt();
+    //ps2mouse_reset(); // This also enables interrupts
 
     //wdt_reset(); // Another kick
 
@@ -97,7 +97,7 @@ int main(void) {
     while(1) {
 	    //wdt_reset(); // Kick the watchdog
 
-            cur_counter = ps2mouse_getBufCounter();
+            /*cur_counter = ps2mouse_getBufCounter();
             if(cur_counter != buf_counter) {
                 ps2_buf = (uint8_t*)ps2mouse_getBuffer();
                 buf_counter = cur_counter;
@@ -110,7 +110,7 @@ int main(void) {
                     uart_putchar(serial_pkt_buf[2], NULL);
                     if(converter_result & 0x02) uart_putchar(serial_pkt_buf[3], NULL); // Send the fourth byte, according to the Logitech serial protocol
                 }
-            }
+            }*/
     }
 
     return 0;
