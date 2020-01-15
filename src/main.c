@@ -98,11 +98,11 @@ static void rts_init(void) {
 }
 
 ISR(INT1_vect) { // Manage INT1
-    uint8_t count = 20;
+    uint8_t count = 100;
     rts_disable_xmit = 1; // Avoid further transmission from the code in the main loop
     while(count--) {
     	uart_putchar(SER_HELLO_PKT, NULL); // Send the hello packet
-    	_delay_ms(100);
+    	_delay_ms(10);
     }
 
     rts_disable_xmit = 0; // Allow transmission again
