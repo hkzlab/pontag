@@ -26,11 +26,14 @@ int main(void) {
 
     // Initialize the I/O 
     io_init();
+    ps2_init();
 
     // Initialize serial port
     uart_init();
     stdout = &uart_output;
     stdin  = &uart_input;
+
+    sei();
 
     // Clear some vars
     converter_status = 0;
@@ -38,17 +41,28 @@ int main(void) {
     // First watchdog kick
     //wdt_reset(); 
 
-    //ps2mouse_init(&PORTB, &DDRB, &PINB, 1);
-    setup_detection_interrupt();
-    //ps2mouse_reset(); // This also enables interrupts
-
     //wdt_reset(); // Another kick
 
     uint8_t buf_counter = 0;
     uint8_t cur_counter = 0;
     uint8_t *ps2_buf;
 
+    ps2_enable_recv(1);
+    ps2_sendbyte(PS2_MOUSE_CMD_RESET);
+    ps2_sendbyte(PS2_MOUSE_CMD_RESET);
+    ps2_sendbyte(PS2_MOUSE_CMD_RESET);
+
+
+    printf("started!\n");
     while(1) {
+	    if(ps2_avail()) {
+	       uint8_t b = ps2_getbyte();
+	       printf("b %.2X\n", b);
+	    } else {
+	       printf("suca\n");
+	    }
+
+	    _delay_ms(500);
 	    //wdt_reset(); // Kick the watchdog
 
             /*cur_counter = ps2mouse_getBufCounter();
