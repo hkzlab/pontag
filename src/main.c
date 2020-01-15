@@ -88,7 +88,7 @@ static void rts_init(void) {
 #if defined (__AVR_ATmega328P__)
     // Toggle at the rising edge
     EICRA |= (1 << ISC10);
-    EICRA |= (1 << ISC11);
+    EICRA &= ~(1 << ISC11);
     EIMSK |= (1 << INT1);
 #elif defined (__AVR_ATmega8A__)
     MCUCR |= (1 << ISC10);
@@ -98,11 +98,11 @@ static void rts_init(void) {
 }
 
 ISR(INT1_vect) { // Manage INT1
-    uint8_t count = 100;
+    uint8_t count = 50;
     rts_disable_xmit = 1; // Avoid further transmission from the code in the main loop
     while(count--) {
     	uart_putchar(SER_HELLO_PKT, NULL); // Send the hello packet
-    	_delay_ms(10);
+    	_delay_ms(50);
     }
 
     rts_disable_xmit = 0; // Allow transmission again
