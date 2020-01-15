@@ -295,7 +295,10 @@ ISR(TIMER0_OVF_vect) {
         TCNT0 = 0;//255;            // 20*255*256/8e6 == 163ms
         TCCR0 = 4;               // prescaler = /256, go!
 #elif defined (__AVR_ATmega328P__)
-        // TODO
+        barkcnt = 40;           
+        TIMSK0 |= _BV(TOIE0);    
+        TCNT0 = 0;        
+        TCCR0B = (TCCR0B & 0xF8) | 0x04; // FIXME
 #endif
         // waited for 100us after pulling clock low, pull data low
         ps2_dat(0);
