@@ -77,10 +77,6 @@ void setup_detection_interrupt(void) {
     EICRA |= (1 << ISC10);
     EICRA |= (1 << ISC11);
     EIMSK |= (1 << INT1);
-#elif defined (__AVR_ATtiny4313__)
-    MCUCR |= (1 << ISC10);
-    MCUCR &= ~(1 << ISC11);
-    GIMSK |= (1 << INT1);
 #elif defined (__AVR_ATmega8A__)
     MCUCR |= (1 << ISC10);
     MCUCR &= ~(1 << ISC11);
