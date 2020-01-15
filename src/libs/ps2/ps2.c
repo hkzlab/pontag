@@ -163,7 +163,9 @@ void ps2_sendbyte(uint8_t byte) {
     TIMSK |= _BV(TOIE0);
     TCCR0 = 4;
 #elif defined (__AVR_ATmega328P__)
-    // TODO
+    TCNT0 = 255-8;
+    TIMSK0 |= _BV(TOIE0);
+    TCCR0B = (TCCR0B & 0xF8) | 0x04; // FIXME
 #endif
 
     while (state != IDLE);
