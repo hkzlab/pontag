@@ -75,7 +75,7 @@ void ps2_init(void) {
 #if defined (__AVR_ATmega8A__)
     MCUCR |= _BV(ISC01);
 #elif defined (__AVR_ATmega328P__)
-    EICRA |= _BV(ISC10);
+    EICRA |= _BV(ISC01);
 #endif
 
     // Disable the timer 0 interrupts
@@ -109,14 +109,15 @@ void ps2_enable_recv(uint8_t enable) {
         GIFR |= _BV(INTF0);
         GICR |= _BV(INT0);
 #elif defined (__AVR_ATmega328P__)
-        // TODO
+        EIFR |= _BV(INTF0);
+        EIMSK |= _BV(INT0);
 #endif
     } else {
         // disable INT0, then everything else
 #if defined (__AVR_ATmega8A__)
         GICR &= ~_BV(INT0);
 #elif defined (__AVR_ATmega328P__)
-        // TODO
+        EIMSK &= ~_BV(INT0);
 #endif
         ps2_clk(0);
         ps2_dir(1,0);
