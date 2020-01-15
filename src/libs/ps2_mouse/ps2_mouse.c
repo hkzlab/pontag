@@ -102,10 +102,12 @@ uint8_t mouse_init() {
 
     mouse_command(PS2_MOUSE_CMD_DISABLE, 1);
     mouse_command(PS2_MOUSE_CMD_SET_DEFAULTS, 1);
-    mouse_command(PS2_MOUSE_CMD_SCALNG21, 1);
+//    mouse_command(PS2_MOUSE_CMD_SCALNG21, 1);
+    mouse_command(PS2_MOUSE_CMD_SCALNG11, 1);
 
     mouse_command(PS2_MOUSE_CMD_SET_RESOLUTION, 1);
-    mouse_command(1, 1);             // 0 = 1, 1 = 2, 2 = 4, 3 = 8 counts/mm
+//    mouse_command(1, 1);             // 0 = 1, 1 = 2, 2 = 4, 3 = 8 counts/mm
+    mouse_command(2, 1);             // 0 = 1, 1 = 2, 2 = 4, 3 = 8 counts/mm
 
     mouse_command(PS2_MOUSE_CMD_STATREQ, 1);
     _delay_ms(22);
