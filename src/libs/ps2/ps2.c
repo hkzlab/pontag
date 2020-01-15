@@ -95,7 +95,9 @@ void ps2_recover(void) {
         TIMSK |= _BV(TOIE0);
         TCCR0 = 4;  // enable: clk/256
 #elif defined (__AVR_ATmega328P__)
-        // TODO
+        TCNT0 = 255-70; // approx 1ms
+        TIMSK0 |= _BV(TOIE0);
+        TCCR0B = (TCCR0B & 0xF8) | 0x04; // FIXME
 #endif
     }
 }
