@@ -48,3 +48,25 @@ uint8_t mouse_reset(void) {
 
 }
 
+int16_t mouse_command(uint8_t cmd, uint8_t wait) {
+    int16_t response = -1;
+    
+    ps2_sendbyte(cmd);
+    if (wait) {
+        _delay_ms(22);
+        if (ps2_avail()) response = ps2_getbyte();
+    }
+    
+    return response;
+}
+
+void mouse_setres(uint8_t res) {
+    mouse_command(PS2_MOUSE_CMD_DISABLE, 1);
+    
+    mouse_command(PS2_MOUSE_CMD_SET_RESOLUTION, 1);
+    mouse_command(res, 1); // 0 = 1, 1 = 2, 2 = 4, 3 = 8 counts/mm
+    
+    mouse_command(PS2_MOUSE_CMD_ENABLE, 1);
+}
+
+
