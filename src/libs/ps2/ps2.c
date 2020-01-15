@@ -224,15 +224,15 @@ ISR(INT0_vect, ISR_NOBLOCK) {
         // state will be switched in timer interrupt handler
         break;
     case TX_DATA:
-        ps2_dat(tx_byte & 001);
-        parity ^= tx_byte & 001;
+        ps2_dat(tx_byte & 0x01);
+        parity ^= tx_byte & 0x01;
         tx_byte >>= 1;
         if (--bits == 0) {
             state = TX_PARITY;
         }
         break;
     case TX_PARITY:
-        ps2_dat(parity ^ 001);
+        ps2_dat(parity ^ 0x01);
         state = TX_STOP;
         break;
     case TX_STOP:
@@ -328,7 +328,8 @@ ISR(TIMER0_OVF_vect) {
             TIMSK &= ~_BV(TOIE0);
             TCCR0 = 0;
 #elif defined (__AVR_ATmega328P__)
-            // TODO
+            TIMSK0 &= ~_BV(TOIE0);
+            TCCR0B &= 0xF8; // FIXME
 #endif
             state = IDLE;
         } else {
