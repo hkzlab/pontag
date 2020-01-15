@@ -4,8 +4,9 @@
 #include <stdint.h>
 
 #define PS2_MOUSE_RESP_ACK 0xfa
-#define PS2_MOUSE_RESP_NACK 0xfe
+#define PS2_MOUSE_RESP_NAK 0xfe
 #define PS2_MOUSE_RESP_ERROR 0xfc
+#define PS2_MOUSE_RESP_RESETOK 0xaa
 
 #define PS2_MOUSE_CMD_READEXTID 0xd0
 #define PS2_MOUSE_CMD_READ2NDID 0xe1
@@ -23,7 +24,7 @@
 #define PS2_MOUSE_CMD_DISABLE 0xf5
 #define PS2_MOUSE_CMD_SET_DEFAULTS 0xf6
 #define PS2_MOUSE_CMD_RESEND 0xfe
-#define PS2_MOUSE_CMD_RESET 0xff // Responses: OK -> AA 00, ERROR -> FC 00
+#define PS2_MOUSE_CMD_RESET 0xff 
 
 void mouse_init(void);
 uint8_t mouse_reset(void);
