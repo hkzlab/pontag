@@ -8,12 +8,12 @@
 
 #include "ioconfig.h"
 #include "ps2.h"
+#include "ps2_mouse.h"
 #include "ps22ser.h"
 
 #include "uart.h"
 
 #include "main.h"
-#include "ps2_proto.h"
 
 void setup_detection_interrupt(void);
 

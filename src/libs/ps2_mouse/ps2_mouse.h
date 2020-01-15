@@ -1,6 +1,8 @@
 #ifndef _PS2_MOUSE_HEADER_
 #define _PS2_MOUSE_HEADER_
 
+#include <stdint.h>
+
 #define PS2_MOUSE_RESP_ACK 0xfa
 #define PS2_MOUSE_RESP_NACK 0xfe
 #define PS2_MOUSE_RESP_ERROR 0xfc
@@ -22,5 +24,10 @@
 #define PS2_MOUSE_CMD_SET_DEFAULTS 0xf6
 #define PS2_MOUSE_CMD_RESEND 0xfe
 #define PS2_MOUSE_CMD_RESET 0xff // Responses: OK -> AA 00, ERROR -> FC 00
+
+void mouse_init(void);
+uint8_t mouse_reset(void);
+int16_t mouse_command(uint8_t cmd, uint8_t wait);
+void mouse_setres(uint8_t res);
 
 #endif /* _PS2_MOUSE_HEADER_ */
