@@ -5,13 +5,31 @@
 #include "ps2.h"
 
 
-static void mouse_flush(uint8_t pace);
+static void mouse_flush_fast(void);
+static void mouse_flush_med(void);
+static void mouse_flush_slow(void);
 
-static void mouse_flush(uint8_t pace) {
-    _delay_ms(pace); 
+static void mouse_flush_fast(void) {
+    _delay_ms(0); 
     do {
         if (ps2_avail()) ps2_getbyte();
-        _delay_ms(pace); 
+        _delay_ms(0); 
+    } while (ps2_avail());
+}
+
+static void mouse_flush_med(void) {
+    _delay_ms(22); 
+    do {
+        if (ps2_avail()) ps2_getbyte();
+        _delay_ms(22); 
+    } while (ps2_avail());
+}
+
+static void mouse_flush_slow(void) {
+    _delay_ms(100); 
+    do {
+        if (ps2_avail()) ps2_getbyte();
+        _delay_ms(100); 
     } while (ps2_avail());
 }
 
@@ -42,7 +60,7 @@ uint8_t mouse_reset(void) {
     
     // flush the rest of reponse, most likely mouse id == 0
     _delay_ms(100);
-    mouse_flush(0);
+    mouse_flush_fast();
     
     return 0;
 
@@ -69,4 +87,30 @@ void mouse_setres(uint8_t res) {
     mouse_command(PS2_MOUSE_CMD_ENABLE, 1);
 }
 
+uint8_t mouse_init() {
+    uint8_t buttons = 0;
+    
+    ps2_enable_recv(1);
+
+    while(1) if (mouse_reset() == 0) break;
+
+    mouse_command(PS2_MOUSE_CMD_DISABLE, 1);
+    mouse_command(PS2_MOUSE_CMD_SCALNG21, 1);
+    
+    mouse_command(PS2_MOUSE_CMD_SET_RESOLUTION, 1);
+    mouse_command(1, 1);             // 0 = 1, 1 = 2, 2 = 4, 3 = 8 counts/mm
+
+    mouse_command(PS2_MOUSE_CMD_STATREQ, 1);
+    _delay_ms(22);
+    
+    if (ps2_avail()) buttons = ps2_getbyte() & 0x07;
+    
+    mouse_flush_med();
+    
+    mouse_command(PS2_MOUSE_CMD_ENABLE, 1);
+
+    mouse_flush_slow();
+
+    return buttons;    
+}
 

@@ -26,7 +26,7 @@
 #define PS2_MOUSE_CMD_RESEND 0xfe
 #define PS2_MOUSE_CMD_RESET 0xff 
 
-void mouse_init(void);
+uint8_t mouse_init(void);
 uint8_t mouse_reset(void);
 int16_t mouse_command(uint8_t cmd, uint8_t wait);
 void mouse_setres(uint8_t res);
