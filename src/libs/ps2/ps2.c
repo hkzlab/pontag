@@ -303,7 +303,8 @@ ISR(TIMER0_OVF_vect) {
         GIFR |= _BV(INTF0); // clear INT0 flag
         GICR |= _BV(INT0);  // enable INT0 @(negedge clk)
 #elif defined (__AVR_ATmega328P__)
-        // TODO
+        EIFR |= _BV(INTF0);
+        EIMSK |= _BV(INT0);
 #endif
 
         // see you in INT0 handler
