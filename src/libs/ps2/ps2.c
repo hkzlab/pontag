@@ -253,7 +253,10 @@ ISR(INT0_vect, ISR_NOBLOCK) {
             TCNT0 = 255-2;              // 4 counts: 2us
             TCCR0 = 2;              // prescaler = f/8: go!
 #elif defined (__AVR_ATmega328P__)
-            // TODO
+            waitcnt = 50;           
+            TIMSK0 |= _BV(TOIE0);    
+            TCNT0 = 255-4;        
+            TCCR0B = (TCCR0B & 0xF8) | 0x02; // FIXME
 #endif
         }
         break;
@@ -280,7 +283,7 @@ ISR(TIMER0_OVF_vect) {
         TCCR0 = 0;
 #elif defined (__AVR_ATmega328P__)
         TIMSK0 &= ~_BV(TOIE0);
-        TCCR0B &= ~0x07; // Clear CS00,02 // FIXME: Do we need to configure only this?
+        TCCR0B &= 0xF8; // Clear CS00,02 // FIXME: Do we need to configure only this?
 #endif
         break;
     case TX_REQ0:
