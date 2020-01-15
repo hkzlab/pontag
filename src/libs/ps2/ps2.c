@@ -75,6 +75,7 @@ void ps2_init(void) {
 #if defined (__AVR_ATmega8A__)
     MCUCR |= _BV(ISC01);
 #elif defined (__AVR_ATmega328P__)
+//    EICRA &= ~(_BV(ISC00) | _BV(ISC01));
     EICRA |= _BV(ISC01);
 #endif
 
@@ -97,7 +98,7 @@ void ps2_recover(void) {
 #elif defined (__AVR_ATmega328P__)
         TCNT0 = 255-70; // approx 1ms
         TIMSK0 |= _BV(TOIE0);
-        TCCR0B = (TCCR0B & 0xF8) | 0x04; // FIXME
+        TCCR0B = 0x04;
 #endif
     }
 }
@@ -126,6 +127,7 @@ void ps2_enable_recv(uint8_t enable) {
     }
 }
 
+// when 0 -> input, when 1 -> output
 void ps2_dir(uint8_t dat_in, uint8_t clk_in) {
     dat_in ? (PS2DDR &= ~_BV(PS2DAT)) : (PS2DDR |= _BV(PS2DAT));
     clk_in ? (PS2DDR &= ~_BV(PS2CLK)) : (PS2DDR |= _BV(PS2CLK));
@@ -167,7 +169,7 @@ void ps2_sendbyte(uint8_t byte) {
 #elif defined (__AVR_ATmega328P__)
     TCNT0 = 255-8;
     TIMSK0 |= _BV(TOIE0);
-    TCCR0B = (TCCR0B & 0xF8) | 0x04; // FIXME
+    TCCR0B = 0x04; // FIXME
 #endif
 
     while (state != IDLE);
@@ -260,7 +262,7 @@ ISR(INT0_vect, ISR_NOBLOCK) {
             waitcnt = 50;
             TIMSK0 |= _BV(TOIE0);
             TCNT0 = 255-4;
-            TCCR0B = (TCCR0B & 0xF8) | 0x02; // FIXME
+            TCCR0B = 0x02; // FIXME
 #endif
         }
         break;
@@ -287,7 +289,7 @@ ISR(TIMER0_OVF_vect) {
         TCCR0 = 0;
 #elif defined (__AVR_ATmega328P__)
         TIMSK0 &= ~_BV(TOIE0);
-        TCCR0B &= 0xF8; // Clear CS00,02 // FIXME: Do we need to configure only this?
+        TCCR0B = 0; // Clear CS00,02 // FIXME: Do we need to configure only this?
 #endif
         break;
     case TX_REQ0:
@@ -302,7 +304,7 @@ ISR(TIMER0_OVF_vect) {
         barkcnt = 40;
         TIMSK0 |= _BV(TOIE0);
         TCNT0 = 0;
-        TCCR0B = (TCCR0B & 0xF8) | 0x04; // FIXME
+        TCCR0B = 0x04; // FIXME
 #endif
         // waited for 100us after pulling clock low, pull data low
         ps2_dat(0);
@@ -333,7 +335,7 @@ ISR(TIMER0_OVF_vect) {
             TCCR0 = 0;
 #elif defined (__AVR_ATmega328P__)
             TIMSK0 &= ~_BV(TOIE0);
-            TCCR0B &= 0xF8; // FIXME
+            TCCR0B = 0x00; // FIXME
 #endif
             state = IDLE;
         } else {

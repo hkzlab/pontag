@@ -101,6 +101,7 @@ uint8_t mouse_init() {
     while(!mouse_reset());
 
     mouse_command(PS2_MOUSE_CMD_DISABLE, 1);
+    mouse_command(PS2_MOUSE_CMD_SET_DEFAULTS, 1);
     mouse_command(PS2_MOUSE_CMD_SCALNG21, 1);
 
     mouse_command(PS2_MOUSE_CMD_SET_RESOLUTION, 1);

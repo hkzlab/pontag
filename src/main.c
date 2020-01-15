@@ -36,7 +36,7 @@ int main(void) {
 
     // First watchdog kick
     wdt_reset();
-    
+
     // Initialize serial port
     uart_init();
     stdout = &uart_output;
@@ -51,28 +51,31 @@ int main(void) {
 
     // Initialize the mouse
     mouse_init();
-    
+
     wdt_reset(); // Another kick
 
     while(1) {
         wdt_reset(); // Kick the watchdog
-        if(ps2_avail()) {
+
+        while(ps2_avail()) {
             ps2_pkt_buf[ps2_buf_counter] = ps2_getbyte();
-            ps2_buf_counter++;
+            ps2_buf_counter = (ps2_buf_counter + 1) % PS2_PKT_SIZE;
 
-            if(ps2_buf_counter == PS2_PKT_SIZE) {
-                ps2_buf_counter = 0; // Reset the counter
-
+            if(!ps2_buf_counter) {
                 converter_result = ps2bufToSer(ps2_pkt_buf, serial_pkt_buf, &converter_status);
 
                 if(converter_result && !rts_disable_xmit) {
+                    ps2_enable_recv(0); // Ok, stop receiving for now
+
+                    //printf("%.2X %.2X %.2X\n", ps2_pkt_buf[0], ps2_pkt_buf[1], ps2_pkt_buf[2]);
                     // Transmit the converted data to the serial port
                     uart_putchar(serial_pkt_buf[0], NULL);
                     uart_putchar(serial_pkt_buf[1], NULL);
                     uart_putchar(serial_pkt_buf[2], NULL);
                     if(converter_result & 0x02) uart_putchar(serial_pkt_buf[3], NULL); // Send the fourth byte, according to the Logitech serial protocol
-                }
 
+                    ps2_enable_recv(1); // Back to getting data!
+                }
             }
         }
     }

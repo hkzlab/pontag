@@ -24,7 +24,7 @@
 #define PS2_MOUSE_CMD_DISABLE 0xf5
 #define PS2_MOUSE_CMD_SET_DEFAULTS 0xf6
 #define PS2_MOUSE_CMD_RESEND 0xfe
-#define PS2_MOUSE_CMD_RESET 0xff 
+#define PS2_MOUSE_CMD_RESET 0xff
 
 uint8_t mouse_init(void);
 uint8_t mouse_reset(void);
