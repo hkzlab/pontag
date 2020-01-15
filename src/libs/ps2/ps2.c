@@ -105,7 +105,7 @@ void ps2_recover(void) {
 void ps2_enable_recv(uint8_t enable) {
     if (enable) {
         state = IDLE;
-        ps2_dir(1,1);
+        ps2_dir(1, 1);
         // enable INT0 interrupt
 #if defined (__AVR_ATmega8A__)
         GIFR |= _BV(INTF0);
@@ -122,7 +122,7 @@ void ps2_enable_recv(uint8_t enable) {
         EIMSK &= ~_BV(INT0);
 #endif
         ps2_clk(0);
-        ps2_dir(1,0);
+        ps2_dir(1, 0);
     }
 }
 
@@ -173,10 +173,10 @@ void ps2_sendbyte(uint8_t byte) {
     while (state != IDLE);
 }
 
-/// Happens every negative PS2 clock transition.
-///
-/// ISR_NOBLOCK because nothing here is really critical, while C1351 emulation
-/// is really time critical.
+// Happens every negative PS2 clock transition.
+//
+// ISR_NOBLOCK because nothing here is really critical, while C1351 emulation
+// is really time critical.
 ISR(INT0_vect, ISR_NOBLOCK) {
     uint8_t ps2_indat = ps2_datin();
     switch (state) {
@@ -257,9 +257,9 @@ ISR(INT0_vect, ISR_NOBLOCK) {
             TCNT0 = 255-2;              // 4 counts: 2us
             TCCR0 = 2;              // prescaler = f/8: go!
 #elif defined (__AVR_ATmega328P__)
-            waitcnt = 50;           
-            TIMSK0 |= _BV(TOIE0);    
-            TCNT0 = 255-4;        
+            waitcnt = 50;
+            TIMSK0 |= _BV(TOIE0);
+            TCNT0 = 255-4;
             TCCR0B = (TCCR0B & 0xF8) | 0x02; // FIXME
 #endif
         }
@@ -299,17 +299,17 @@ ISR(TIMER0_OVF_vect) {
         TCNT0 = 0;//255;            // 20*255*256/8e6 == 163ms
         TCCR0 = 4;               // prescaler = /256, go!
 #elif defined (__AVR_ATmega328P__)
-        barkcnt = 40;           
-        TIMSK0 |= _BV(TOIE0);    
-        TCNT0 = 0;        
+        barkcnt = 40;
+        TIMSK0 |= _BV(TOIE0);
+        TCNT0 = 0;
         TCCR0B = (TCCR0B & 0xF8) | 0x04; // FIXME
 #endif
         // waited for 100us after pulling clock low, pull data low
         ps2_dat(0);
-        ps2_dir(0,0);
+        ps2_dir(0, 0);
 
         // release the clock line
-        ps2_dir(0,1);
+        ps2_dir(0, 1);
 
 #if defined (__AVR_ATmega8A__)
         GIFR |= _BV(INTF0); // clear INT0 flag

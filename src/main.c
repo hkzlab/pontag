@@ -15,76 +15,72 @@
 
 #include "main.h"
 
-void setup_detection_interrupt(void);
+#define PS2_PKT_SIZE 3
+
+static volatile uint8_t rts_disable_xmit = 0;
+static void rts_init(void);
 
 int main(void) {
     uint8_t serial_pkt_buf[4]; // Buffer for serial packets
+    uint8_t ps2_pkt_buf[PS2_PKT_SIZE]; // Buffer for ps/2 packets
     uint8_t converter_status; // PS/2 -> Serial conversion state var, used to keep track of state during iteration
     uint8_t converter_result; // Instanteneous result of the conversion
+    uint8_t ps2_buf_counter = 0;
 
-    //wdt_enable(WDTO_2S); // Enable the watchdog to reset in 2 seconds...
+    wdt_enable(WDTO_4S); // Enable the watchdog to reset in 4 seconds...
 
-    // Initialize the I/O 
+    // Initialize the I/O and communications
     io_init();
+    rts_init();
     ps2_init();
 
+    // First watchdog kick
+    wdt_reset();
+    
     // Initialize serial port
     uart_init();
     stdout = &uart_output;
     stdin  = &uart_input;
 
+    // Enable interrupts
     sei();
 
     // Clear some vars
     converter_status = 0;
+    rts_disable_xmit = 0;
 
-    // First watchdog kick
-    //wdt_reset(); 
+    // Initialize the mouse
+    mouse_init();
+    
+    wdt_reset(); // Another kick
 
-    //wdt_reset(); // Another kick
-
-    uint8_t buf_counter = 0;
-    uint8_t cur_counter = 0;
-    uint8_t *ps2_buf;
-
-    ps2_enable_recv(1);
-    ps2_sendbyte(PS2_MOUSE_CMD_RESET);
-    ps2_sendbyte(PS2_MOUSE_CMD_RESET);
-    ps2_sendbyte(PS2_MOUSE_CMD_RESET);
-
-
-    printf("started!\n");
     while(1) {
-	    if(ps2_avail()) {
-	       uint8_t b = ps2_getbyte();
-	       printf("b %.2X\n", b);
-	    } else {
-	       printf("suca\n");
-	    }
+        wdt_reset(); // Kick the watchdog
+        if(ps2_avail()) {
+            ps2_pkt_buf[ps2_buf_counter] = ps2_getbyte();
+            ps2_buf_counter++;
 
-	    _delay_ms(500);
-	    //wdt_reset(); // Kick the watchdog
+            if(ps2_buf_counter == PS2_PKT_SIZE) {
+                ps2_buf_counter = 0; // Reset the counter
 
-            /*cur_counter = ps2mouse_getBufCounter();
-            if(cur_counter != buf_counter) {
-                ps2_buf = (uint8_t*)ps2mouse_getBuffer();
-                buf_counter = cur_counter;
-                converter_result = ps2bufToSer(ps2_buf, serial_pkt_buf, &converter_status);
+                converter_result = ps2bufToSer(ps2_pkt_buf, serial_pkt_buf, &converter_status);
 
-                if(converter_result) {
+                if(converter_result && !rts_disable_xmit) {
                     // Transmit the converted data to the serial port
                     uart_putchar(serial_pkt_buf[0], NULL);
                     uart_putchar(serial_pkt_buf[1], NULL);
                     uart_putchar(serial_pkt_buf[2], NULL);
                     if(converter_result & 0x02) uart_putchar(serial_pkt_buf[3], NULL); // Send the fourth byte, according to the Logitech serial protocol
                 }
-            }*/
+
+            }
+        }
     }
 
     return 0;
 }
 
-void setup_detection_interrupt(void) {
+static void rts_init(void) {
     // Enable INT1, and have it toggle at any logical level change
 #if defined (__AVR_ATmega328P__)
     // Toggle at the rising edge
@@ -99,7 +95,9 @@ void setup_detection_interrupt(void) {
 }
 
 ISR(INT1_vect) { // Manage INT1
+    rts_disable_xmit = 1; // Avoid further transmission from the code in the main loop
     _delay_ms(150);
-    uart_putchar(SER_HELLO_PKT, NULL);
+    uart_putchar(SER_HELLO_PKT, NULL); // Send the hello packet
+    rts_disable_xmit = 0; // Allow transmission again
 }
 
