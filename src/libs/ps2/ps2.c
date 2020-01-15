@@ -82,7 +82,7 @@ void ps2_init(void) {
 #if defined (__AVR_ATmega8A__)
     TIMSK &= ~_BV(TOIE0);
 #elif defined (__AVR_ATmega328P__)
-    // TODO
+    TIMSK0 &= ~_BV(TOIE0);
 #endif
 }
 
@@ -279,7 +279,8 @@ ISR(TIMER0_OVF_vect) {
         TIMSK &= ~_BV(TOIE0);
         TCCR0 = 0;
 #elif defined (__AVR_ATmega328P__)
-        // TODO
+        TIMSK0 &= ~_BV(TOIE0);
+        TCCR0B &= ~0x07; // Clear CS00,02 // FIXME: Do we need to configure only this?
 #endif
         break;
     case TX_REQ0:
