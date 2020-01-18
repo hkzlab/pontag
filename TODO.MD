@@ -4,6 +4,7 @@
 # Board TODOs
 - [ ] Support power from 5v header and from TX, RTS, DTR lines
 - [ ] Make sure power sources are selected via header
+- [ ] Consider adding a capacitor on the power line to survive small drops of power when toggling RTS/DTR lines
 
 # Misc TODOs
 ## Makefile
