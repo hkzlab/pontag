@@ -123,14 +123,14 @@ F 3 "~" H 4000 7050 50  0001 C CNN
 	0    -1   1    0   
 $EndComp
 $Comp
-L Regulator_Linear:L78L05_TO92 U?
+L Regulator_Linear:L78L05_TO92 U1
 U 1 1 5E236C87
-P 6450 5650
-F 0 "U?" H 6450 5892 50  0000 C CNN
-F 1 "L78L05_TO92" H 6450 5801 50  0000 C CNN
-F 2 "Package_TO_SOT_THT:TO-92_Inline" H 6450 5875 50  0001 C CIN
-F 3 "http://www.st.com/content/ccc/resource/technical/document/datasheet/15/55/e5/aa/23/5b/43/fd/CD00000446.pdf/files/CD00000446.pdf/jcr:content/translations/en.CD00000446.pdf" H 6450 5600 50  0001 C CNN
-	1    6450 5650
+P 5300 7050
+F 0 "U1" H 5300 7292 50  0000 C CNN
+F 1 "L78L05_TO92" H 5300 7201 50  0000 C CNN
+F 2 "Package_TO_SOT_THT:TO-92_Inline" H 5300 7275 50  0001 C CIN
+F 3 "http://www.st.com/content/ccc/resource/technical/document/datasheet/15/55/e5/aa/23/5b/43/fd/CD00000446.pdf/files/CD00000446.pdf/jcr:content/translations/en.CD00000446.pdf" H 5300 7000 50  0001 C CNN
+	1    5300 7050
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -169,12 +169,12 @@ $EndComp
 $Comp
 L Device:Jumper JP1
 U 1 1 5E23692F
-P 8400 5050
-F 0 "JP1" H 8400 5314 50  0000 C CNN
-F 1 "Internal 5V" H 8400 5223 50  0000 C CNN
-F 2 "" H 8400 5050 50  0001 C CNN
-F 3 "~" H 8400 5050 50  0001 C CNN
-	1    8400 5050
+P 6200 7050
+F 0 "JP1" H 6200 7314 50  0000 C CNN
+F 1 "Internal 5V" H 6200 7223 50  0000 C CNN
+F 2 "" H 6200 7050 50  0001 C CNN
+F 3 "~" H 6200 7050 50  0001 C CNN
+	1    6200 7050
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -262,4 +262,141 @@ Wire Notes Line
 	4350 6550 4350 7750
 Wire Notes Line
 	4350 7750 2250 7750
+$Comp
+L Device:C_Small C5
+U 1 1 5E286BDE
+P 5750 7350
+F 0 "C5" H 5842 7396 50  0000 L CNN
+F 1 "10nF" H 5842 7305 50  0000 L CNN
+F 2 "" H 5750 7350 50  0001 C CNN
+F 3 "~" H 5750 7350 50  0001 C CNN
+	1    5750 7350
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:CP1_Small C4
+U 1 1 5E287550
+P 4850 7350
+F 0 "C4" H 4941 7396 50  0000 L CNN
+F 1 "1.0uF" H 4941 7305 50  0000 L CNN
+F 2 "" H 4850 7350 50  0001 C CNN
+F 3 "~" H 4850 7350 50  0001 C CNN
+	1    4850 7350
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4850 7450 4850 7500
+Wire Wire Line
+	4850 7500 5300 7500
+Wire Wire Line
+	5750 7500 5750 7450
+Wire Wire Line
+	5300 7350 5300 7500
+Connection ~ 5300 7500
+Wire Wire Line
+	5300 7500 5750 7500
+$Comp
+L power:GND #PWR?
+U 1 1 5E29163A
+P 5300 7550
+F 0 "#PWR?" H 5300 7300 50  0001 C CNN
+F 1 "GND" H 5150 7450 50  0000 C CNN
+F 2 "" H 5300 7550 50  0001 C CNN
+F 3 "" H 5300 7550 50  0001 C CNN
+	1    5300 7550
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5300 7500 5300 7550
+Wire Wire Line
+	5600 7050 5750 7050
+Wire Wire Line
+	5750 7050 5750 7250
+Wire Wire Line
+	5000 7050 4850 7050
+Wire Wire Line
+	4850 7050 4850 7250
+$Comp
+L Device:CP1_Small C3
+U 1 1 5E293DAA
+P 2950 6950
+F 0 "C3" V 3050 7050 50  0000 C CNN
+F 1 "0.47uF" V 3050 6800 50  0000 C CNN
+F 2 "" H 2950 6950 50  0001 C CNN
+F 3 "~" H 2950 6950 50  0001 C CNN
+	1    2950 6950
+	0    -1   -1   0   
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 5E29A89C
+P 3400 6950
+F 0 "#PWR?" H 3400 6700 50  0001 C CNN
+F 1 "GND" V 3405 6822 50  0000 R CNN
+F 2 "" H 3400 6950 50  0001 C CNN
+F 3 "" H 3400 6950 50  0001 C CNN
+	1    3400 6950
+	0    -1   -1   0   
+$EndComp
+Wire Wire Line
+	3050 6950 3400 6950
+$Comp
+L power:+5V #PWR?
+U 1 1 5E29E3AD
+P 2350 7050
+F 0 "#PWR?" H 2350 6900 50  0001 C CNN
+F 1 "+5V" H 2365 7223 50  0000 C CNN
+F 2 "" H 2350 7050 50  0001 C CNN
+F 3 "" H 2350 7050 50  0001 C CNN
+	1    2350 7050
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	2850 6950 2350 6950
+Wire Wire Line
+	2350 6950 2350 7050
+$Comp
+L power:+12V #PWR?
+U 1 1 5E2A452C
+P 4700 6900
+F 0 "#PWR?" H 4700 6750 50  0001 C CNN
+F 1 "+12V" H 4550 6950 50  0000 C CNN
+F 2 "" H 4700 6900 50  0001 C CNN
+F 3 "" H 4700 6900 50  0001 C CNN
+	1    4700 6900
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4700 6900 4700 7050
+Wire Wire Line
+	4700 7050 4850 7050
+Connection ~ 4850 7050
+Wire Wire Line
+	5750 7050 5900 7050
+Connection ~ 5750 7050
+$Comp
+L power:+5V #PWR?
+U 1 1 5E2AF561
+P 6650 6900
+F 0 "#PWR?" H 6650 6750 50  0001 C CNN
+F 1 "+5V" H 6800 6950 50  0000 C CNN
+F 2 "" H 6650 6900 50  0001 C CNN
+F 3 "" H 6650 6900 50  0001 C CNN
+	1    6650 6900
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	6650 6900 6650 7050
+Wire Wire Line
+	6650 7050 6500 7050
+Wire Notes Line
+	4400 6550 4400 7750
+Wire Notes Line
+	4400 7750 6900 7750
+Wire Notes Line
+	6900 7750 6900 6550
+Wire Notes Line
+	6900 6550 4400 6550
+Text Notes 5550 6750 2    100  ~ 0
+5V Regulation
 $EndSCHEMATC
