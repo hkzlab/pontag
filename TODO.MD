@@ -5,6 +5,7 @@
 - [ ] Support power from 5v header and from TX, RTS, DTR lines
 - [ ] Make sure power sources are selected via header
 - [ ] Consider adding a capacitor on the power line to survive small drops of power when toggling RTS/DTR lines
+- [ ] If we wish to use 3.3v to power the AVR, we need to keep a 12v->5v regulator for the PS/2 mouse
 
 # Misc TODOs
 ## Makefile
