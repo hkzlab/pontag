@@ -1,5 +1,5 @@
 # Code TODOs
-- [ ] Add ifdefs in code to differentiate between 328p at 16 and 8Mhz
+- [X] Add ifdefs in code to differentiate between 328p at 16 and 8Mhz
 
 # Board TODOs
 - [ ] Support power from 5v header and from TX, RTS, DTR lines

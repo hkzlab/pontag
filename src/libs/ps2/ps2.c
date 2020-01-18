@@ -96,10 +96,16 @@ void ps2_recover(void) {
         TIMSK |= _BV(TOIE0);
         TCCR0 = 4;  // enable: clk/256
 #elif defined (__AVR_ATmega328P__)
+#if (F_CPU==16000000)
         TCNT0 = 255-70; // approx 1ms
         TIMSK0 |= _BV(TOIE0);
         TCCR0B = 0x04;
-#endif
+#else /* 8Mhz */
+        TCNT0 = 255-35; // approx 1ms
+        TIMSK0 |= _BV(TOIE0);
+        TCCR0B = 0x04;
+#endif /* CPU speed */
+#endif /* AVR Type */
     }
 }
 
@@ -167,9 +173,15 @@ void ps2_sendbyte(uint8_t byte) {
     TIMSK |= _BV(TOIE0);
     TCCR0 = 4;
 #elif defined (__AVR_ATmega328P__)
+#if (F_CPU==16000000)
     TCNT0 = 255-8;
     TIMSK0 |= _BV(TOIE0);
-    TCCR0B = 0x04; // FIXME
+    TCCR0B = 0x04;
+#else /* 8Mhz */
+    TCNT0 = 255-4;
+    TIMSK0 |= _BV(TOIE0);
+    TCCR0B = 0x04;
+#endif 
 #endif
 
     while (state != IDLE);
@@ -259,10 +271,17 @@ ISR(INT0_vect, ISR_NOBLOCK) {
             TCNT0 = 255-2;              // 4 counts: 2us
             TCCR0 = 2;              // prescaler = f/8: go!
 #elif defined (__AVR_ATmega328P__)
+#if (F_CPU==16000000)
             waitcnt = 50;
             TIMSK0 |= _BV(TOIE0);
             TCNT0 = 255-4;
-            TCCR0B = 0x02; // FIXME
+            TCCR0B = 0x02;
+#else /* 8Mhz */
+            waitcnt = 50;
+            TIMSK0 |= _BV(TOIE0);
+            TCNT0 = 255-2;
+            TCCR0B = 0x02;
+#endif
 #endif
         }
         break;
@@ -301,10 +320,17 @@ ISR(TIMER0_OVF_vect) {
         TCNT0 = 0;//255;            // 20*255*256/8e6 == 163ms
         TCCR0 = 4;               // prescaler = /256, go!
 #elif defined (__AVR_ATmega328P__)
+#if (F_CPU==16000000)
         barkcnt = 40;
         TIMSK0 |= _BV(TOIE0);
         TCNT0 = 0;
-        TCCR0B = 0x04; // FIXME
+        TCCR0B = 0x04;
+#else /* 8Mhz */
+        barkcnt = 20;
+        TIMSK0 |= _BV(TOIE0);
+        TCNT0 = 0;
+        TCCR0B = 0x04;
+#endif
 #endif
         // waited for 100us after pulling clock low, pull data low
         ps2_dat(0);
