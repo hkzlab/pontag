@@ -11,3 +11,7 @@
 ## Makefile
 - [ ] For `Makefile.328_p` make sure AVR fuses are set to internal RC
 - [ ] For `Makefile.8a` make sure fuses and `avrdude` options are correct for ATmega8A
+
+## Bootloader
+- [ ] Decide which bootloader to use (if any). E.g [optiboot](https://github.com/Optiboot/optiboot)
+- [ ] If using the bootloader, how much time to wait before starting the program?
