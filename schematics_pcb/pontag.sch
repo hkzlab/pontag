@@ -4,10 +4,10 @@ EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 1
-Title ""
+Title "Pontag Mouse Adapter"
 Date ""
 Rev ""
-Comp ""
+Comp "HKZlab"
 Comment1 ""
 Comment2 ""
 Comment3 ""
@@ -690,18 +690,16 @@ F 3 "~" H 2650 3700 50  0001 C CNN
 	1    2650 3700
 	0    1    1    0   
 $EndComp
-Wire Wire Line
-	5950 7300 6200 7300
 $Comp
 L power:GND #PWR0114
 U 1 1 5E48BB1B
-P 6200 7300
-F 0 "#PWR0114" H 6200 7050 50  0001 C CNN
-F 1 "GND" V 6205 7172 50  0000 R CNN
-F 2 "" H 6200 7300 50  0001 C CNN
-F 3 "" H 6200 7300 50  0001 C CNN
-	1    6200 7300
-	0    -1   -1   0   
+P 5650 7550
+F 0 "#PWR0114" H 5650 7300 50  0001 C CNN
+F 1 "GND" H 5550 7500 50  0000 R CNN
+F 2 "" H 5650 7550 50  0001 C CNN
+F 3 "" H 5650 7550 50  0001 C CNN
+	1    5650 7550
+	1    0    0    -1  
 $EndComp
 $Comp
 L power:VCC #PWR0115
@@ -718,17 +716,6 @@ Text Label 6450 7400 2    50   ~ 0
 PS2-DATA
 Text Label 6450 7200 2    50   ~ 0
 PS2-CLOCK
-$Comp
-L Connector:Mini-DIN-6 J4
-U 1 1 5E35444E
-P 5650 7300
-F 0 "J4" H 5650 7667 50  0000 C CNN
-F 1 "PS/2 Mouse" H 5650 7576 50  0000 C CNN
-F 2 "" H 5650 7300 50  0001 C CNN
-F 3 "http://service.powerdynamics.com/ec/Catalog17/Section%2011.pdf" H 5650 7300 50  0001 C CNN
-	1    5650 7300
-	1    0    0    -1  
-$EndComp
 Wire Wire Line
 	5950 7200 6450 7200
 Wire Wire Line
@@ -1180,4 +1167,24 @@ Text Notes 650  750  0    100  ~ 0
 AVR Microcontroller
 Text Notes 4850 4500 0    50   ~ 0
 MCU should be either ATMega328P or ATMega8A
+$Comp
+L 4x1md_symbols:Mini-DIN_6pins_ver2 J4
+U 1 1 5E3C81A7
+P 5650 7300
+F 0 "J4" H 5650 7635 50  0000 C CNN
+F 1 "PS/2 Mouse" H 5650 7544 50  0000 C CNN
+F 2 "4x1md_footprints:Connector_Mini-DIN_Female_6Pin_2rows" H 5650 7543 50  0001 C CNN
+F 3 "" H 5650 7320 50  0001 C CNN
+	1    5650 7300
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5650 7500 5650 7550
+Wire Wire Line
+	6550 7300 6550 7550
+Wire Wire Line
+	6550 7550 5650 7550
+Wire Wire Line
+	5950 7300 6550 7300
+Connection ~ 5650 7550
 $EndSCHEMATC
