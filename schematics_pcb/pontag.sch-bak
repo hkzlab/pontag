@@ -4,10 +4,10 @@ EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 1
-Title ""
+Title "Pontag Mouse Adapter"
 Date ""
 Rev ""
-Comp ""
+Comp "HKZlab"
 Comment1 ""
 Comment2 ""
 Comment3 ""
@@ -19,7 +19,7 @@ U 1 1 5E22F58A
 P 1600 7300
 F 0 "Y1" V 1646 7169 50  0000 R CNN
 F 1 "8.0Mhz" V 1555 7169 50  0000 R CNN
-F 2 "" H 1600 7300 50  0001 C CNN
+F 2 "Crystal:Crystal_HC49-U_Vertical" H 1600 7300 50  0001 C CNN
 F 3 "~" H 1600 7300 50  0001 C CNN
 	1    1600 7300
 	0    -1   -1   0   
@@ -41,7 +41,7 @@ U 1 1 5E2300A3
 P 1000 7150
 F 0 "C1" V 1229 7150 50  0000 C CNN
 F 1 "22pF" V 1138 7150 50  0000 C CNN
-F 2 "" H 1000 7150 50  0001 C CNN
+F 2 "Capacitor_THT:C_Disc_D3.0mm_W2.0mm_P2.50mm" H 1000 7150 50  0001 C CNN
 F 3 "~" H 1000 7150 50  0001 C CNN
 	1    1000 7150
 	0    -1   -1   0   
@@ -52,7 +52,7 @@ U 1 1 5E230E1C
 P 1000 7450
 F 0 "C2" V 800 7450 50  0000 C CNN
 F 1 "22pF" V 900 7450 50  0000 C CNN
-F 2 "" H 1000 7450 50  0001 C CNN
+F 2 "Capacitor_THT:C_Disc_D3.0mm_W2.0mm_P2.50mm" H 1000 7450 50  0001 C CNN
 F 3 "~" H 1000 7450 50  0001 C CNN
 	1    1000 7450
 	0    -1   -1   0   
@@ -200,7 +200,7 @@ U 1 1 5E2E62E5
 P 1500 6100
 F 0 "J2" H 1450 6100 50  0000 R CNN
 F 1 "External 12V" H 1450 6000 50  0000 R CNN
-F 2 "" H 1500 6100 50  0001 C CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical" H 1500 6100 50  0001 C CNN
 F 3 "~" H 1500 6100 50  0001 C CNN
 	1    1500 6100
 	-1   0    0    -1  
@@ -237,7 +237,7 @@ U 1 1 5E2D676A
 P 1250 5750
 F 0 "J1" H 1300 5850 50  0000 C CNN
 F 1 "12V Selector" H 1300 5550 50  0000 C CNN
-F 2 "" H 1250 5750 50  0001 C CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_2x02_P2.54mm_Vertical" H 1250 5750 50  0001 C CNN
 F 3 "~" H 1250 5750 50  0001 C CNN
 	1    1250 5750
 	1    0    0    -1  
@@ -510,7 +510,7 @@ U 1 1 5E42CEB5
 P 3900 6100
 F 0 "J6" H 3850 6100 50  0000 R CNN
 F 1 "External 5V" H 3850 6000 50  0000 R CNN
-F 2 "" H 3900 6100 50  0001 C CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical" H 3900 6100 50  0001 C CNN
 F 3 "~" H 3900 6100 50  0001 C CNN
 	1    3900 6100
 	-1   0    0    -1  
@@ -644,7 +644,7 @@ U 1 1 5E46876B
 P 9150 4850
 F 0 "U4" H 8600 5900 50  0000 C CNN
 F 1 "MAX232" H 9600 5900 50  0000 C CNN
-F 2 "" H 9200 3800 50  0001 L CNN
+F 2 "Package_DIP:DIP-16_W7.62mm" H 9200 3800 50  0001 L CNN
 F 3 "http://www.ti.com/lit/ds/symlink/max232.pdf" H 9150 4950 50  0001 C CNN
 	1    9150 4850
 	1    0    0    -1  
@@ -663,7 +663,7 @@ U 1 1 5E47EC3B
 P 6300 5600
 F 0 "SW1" V 6254 5748 50  0000 L CNN
 F 1 "Reset" V 6345 5748 50  0000 L CNN
-F 2 "" H 6300 5800 50  0001 C CNN
+F 2 "Button_Switch_THT:SW_PUSH_6mm" H 6300 5800 50  0001 C CNN
 F 3 "~" H 6300 5800 50  0001 C CNN
 	1    6300 5600
 	0    1    1    0   
@@ -786,7 +786,7 @@ U 1 1 5E3C9426
 P 5350 5800
 F 0 "J5" H 5500 6250 50  0000 R CNN
 F 1 "AVR-ISP-6" H 5750 5450 50  0000 R CNN
-F 2 "" V 5100 5850 50  0001 C CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_2x03_P2.54mm_Vertical" V 5100 5850 50  0001 C CNN
 F 3 " ~" H 4075 5250 50  0001 C CNN
 	1    5350 5800
 	1    0    0    -1  
