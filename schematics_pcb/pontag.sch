@@ -1090,17 +1090,6 @@ Wire Notes Line
 	6950 550  6950 2750
 Text Notes 7050 750  0    100  ~ 0
 RS232 Port
-$Comp
-L Connector_Generic:Conn_02x06_Counter_Clockwise J7
-U 1 1 5E35C163
-P 3550 2700
-F 0 "J7" H 3600 3117 50  0000 C CNN
-F 1 "Extra" H 3600 3026 50  0000 C CNN
-F 2 "Connector_PinSocket_2.54mm:PinSocket_2x06_P2.54mm_Vertical" H 3550 2700 50  0001 C CNN
-F 3 "~" H 3550 2700 50  0001 C CNN
-	1    3550 2700
-	1    0    0    -1  
-$EndComp
 Wire Wire Line
 	2000 3000 3350 3000
 Wire Wire Line
@@ -1187,4 +1176,15 @@ Wire Wire Line
 Wire Wire Line
 	5950 7300 6550 7300
 Connection ~ 5650 7550
+$Comp
+L Connector_Generic:Conn_02x06_Odd_Even J7
+U 1 1 5E2843F3
+P 3550 2700
+F 0 "J7" H 3600 3117 50  0000 C CNN
+F 1 "Extra" H 3600 3026 50  0000 C CNN
+F 2 "Connector_PinSocket_2.54mm:PinSocket_2x06_P2.54mm_Vertical" H 3550 2700 50  0001 C CNN
+F 3 "~" H 3550 2700 50  0001 C CNN
+	1    3550 2700
+	1    0    0    -1  
+$EndComp
 $EndSCHEMATC
