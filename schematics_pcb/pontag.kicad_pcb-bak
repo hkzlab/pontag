@@ -2,7 +2,7 @@
 
   (general
     (thickness 1.6)
-    (drawings 5)
+    (drawings 6)
     (tracks 290)
     (zones 0)
     (modules 35)
@@ -2493,6 +2493,9 @@
     )
   )
 
+  (gr_text "PS/2 -> RS232 (Microsoft protocol) mouse adapter" (at 177.8 128.27 270) (layer B.SilkS)
+    (effects (font (size 1 1) (thickness 0.15)) (justify mirror))
+  )
   (gr_text "Pontag - Proto 00" (at 210.82 134.62 -90) (layer B.SilkS)
     (effects (font (size 2 2) (thickness 0.15)) (justify mirror))
   )
