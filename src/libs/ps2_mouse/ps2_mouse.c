@@ -1,291 +1,125 @@
 #include "ps2_mouse.h"
-#include "ps2_proto.h"
 
-#include <avr/io.h>
-#include <avr/interrupt.h>
 #include <util/delay.h>
 
-#include <stdio.h>
+#include "ps2.h"
 
-// See the following link for details on PS/2 protocol
-// http://www.computer-engineering.org/ps2protocol/
-// See the following link for details on the keyboard PS/2 commands
-// http://www.computer-engineering.org/ps2keyboard/
 
-// Data port
-static volatile uint8_t *dPort, *dPin, *dDir;
-static volatile uint8_t dPNum; // Data port pin (leg) number
+static void mouse_flush_fast(void);
+static void mouse_flush_med(void);
+static void mouse_flush_slow(void);
 
-// Clock port
-static volatile uint8_t *cPort, *cPin, *cDir;
-static volatile uint8_t cPNum;
-
-#define CLOCK_FALL 0
-#define CLOCK_RISE 1
-#define PS2_START_BITCOUNT 11 // 12 bits is only for host-to-device communication
-
-static volatile uint8_t clock_edge;
-static volatile uint8_t bitCount;
-
-#define PARITY_BIT(a) ((a >> 1) & 0x01)
-#define STOP_BIT(a) ((a >> 2) & 0x01)
-
-#define SET_PARITY_BIT(a, b) (a |= (b << 1))
-#define SET_STOP_BIT(a, b) (a |= (b << 2))
-
-static volatile uint8_t data_buf[DATA_BUFFER_SIZE];
-static volatile uint8_t bak_data_buf[DATA_BUFFER_SIZE];
-static volatile uint8_t data_buf_idx = 0;
-static volatile uint8_t buf_enabled = 0;
-static volatile uint8_t bak_data_buf_counter = 0;
-
-static volatile uint8_t ps2_data, ps2_flag;
-
-int parity_check(uint8_t flag_i, uint8_t data_i);
-void pushData(uint8_t data);
-void buf_clear(void);
-void ps2_state_clear(void);
-
-int parity_check(uint8_t flag_i, uint8_t data_i) {
-    uint8_t result = 1;
-    uint8_t counter = 8;
-
-    while (counter--) {
-        result = data_i & 0x1 ? !result : result;
-        data_i >>= 1;
-    }
-
-    return (result == PARITY_BIT(flag_i));
+static void mouse_flush_fast(void) {
+    _delay_ms(0);
+    do {
+        if (ps2_avail()) ps2_getbyte();
+        _delay_ms(0);
+    } while (ps2_avail());
 }
 
-void buf_clear(void) {
-    data_buf_idx = 0;
+static void mouse_flush_med(void) {
+    _delay_ms(22);
+    do {
+        if (ps2_avail()) ps2_getbyte();
+        _delay_ms(22);
+    } while (ps2_avail());
 }
 
-// See http://avrprogrammers.com/example_avr_keyboard.php
-// http://elecrom.wordpress.com/2008/02/12/avr-tutorial-2-avr-input-output/
-void ps2mouse_init(volatile uint8_t *dataPort, volatile uint8_t *dataDir, volatile uint8_t *dataPin, uint8_t pNum) {
-    // Clear the buffer variables
-    buf_enabled = 0;
-    buf_clear();
-
-    // Prepare structures for AVR ports
-    dPort = dataPort;
-    dPin = dataPin;
-    dDir = dataDir;
-    dPNum = pNum;
-
-    cPort = &PORTD;
-    cPin = &PIND;
-    cDir = &DDRD;
-    cPNum = 2; // PD2
-
-    // Release PS2 lines and set to interrupt on the falling edge
-    ps2_state_clear();
-
-    // Enable INT0
-#if defined (__AVR_ATmega328P__)
-    EIMSK |= (1 << INT0);
-#elif defined (__AVR_ATtiny4313__)
-    GIMSK |= (1 << INT0);
-#elif defined (__AVR_ATmega8A__)
-    GICR  |= (1 << INT0);
-#endif
+static void mouse_flush_slow(void) {
+    _delay_ms(100);
+    do {
+        if (ps2_avail()) ps2_getbyte();
+        _delay_ms(100);
+    } while (ps2_avail());
 }
 
-void ps2_state_clear(void) {
-    // Prepare data port
-    *dDir &= ~(1 << dPNum); // Release Data
+uint8_t mouse_reset(void) {
+    uint8_t i, b = 33;
+    const uint8_t ntries = 11;
 
-    // Prepare clock port
-    *cDir &= ~(1 << cPNum); // Release Clock line
+    mouse_flush_fast();
 
-    // See http://www.avr-tutorials.com/interrupts/The-AVR-8-Bits-Microcontrollers-External-Interrupts
-    // And http://www.atmel.com/images/doc2543.pdf
+    // Disable the mouse, you never know....
+    ps2_sendbyte(PS2_MOUSE_CMD_DISABLE);
+    mouse_flush_fast();
 
-#if defined (__AVR_ATmega328P__)
-    EICRA &= ~((1 << ISC00) | (1 << ISC01));
-    EICRA |= (1 << ISC01);  // Trigger interrupt at FALLING EDGE (INT0)
-#elif defined (__AVR_ATtiny4313__) || defined (__AVR_ATmega8A__)
-    MCUCR &= ~((1 << ISC00) | (1 << ISC01));
-    MCUCR |= (1 << ISC01);  // Trigger interrupt at FALLING EDGE (INT0)
-#endif
-    // Clear the fields used by the interrupt callback
-    clock_edge = CLOCK_FALL;
-    bitCount = PS2_START_BITCOUNT;
+    // send reset command
+    ps2_sendbyte(PS2_MOUSE_CMD_RESET);
+    ps2_sendbyte(PS2_MOUSE_CMD_RESET);
+    ps2_sendbyte(PS2_MOUSE_CMD_RESET);
 
-    ps2_data = 0;
-    ps2_flag = 0;
-}
-
-void ps2mouse_reset() {
-    buf_enabled = 0;
-
-    ps2mouse_sendCommand(PS2_MOUSE_CMD_DISABLE); // This also enables interrupts
-    _delay_ms(500);
-    ps2mouse_sendCommand(PS2_MOUSE_CMD_RESET); // This also enables interrupts
-    _delay_ms(500);
-    ps2mouse_sendCommand(PS2_MOUSE_CMD_SET_DEFAULTS); // This also enables interrupts
-    _delay_ms(500);
-    ps2mouse_sendCommand(PS2_MOUSE_CMD_ENABLE); // This also enables interrupts
-    _delay_ms(500);
-    buf_clear();
-    buf_enabled = 1; // Start accepting data
-}
-
-void pushData(uint8_t data) {
-    if(!buf_enabled) return;
-
-    data_buf[data_buf_idx] = data;
-    data_buf_idx = (data_buf_idx + 1) % DATA_BUFFER_SIZE;
-    if(data_buf_idx == 0) {
-        for(uint8_t idx = 0; idx < DATA_BUFFER_SIZE; idx++) bak_data_buf[idx] = data_buf[idx];
-        bak_data_buf_counter++;
-    }
-}
-
-uint8_t ps2mouse_getBufCounter(void) {
-    return bak_data_buf_counter;
-}
-
-volatile uint8_t *ps2mouse_getBuffer(void) {
-    return bak_data_buf;
-}
-
-/*
- * Host-to-Device PS/2 transmission
- * 1. Bring CLOCK line low for at least 100uS
- * 2. Bring DATA line low
- * 3. Release CLOCK line
- * 4. Wait for the device to bring CLOCK low
- * 5. Set/Reset DATA line to send the first data bit
- * 6. Wait for the device to bring CLOCK high
- * 7. Wait for the device to bring CLOCK low
- * 8. Repeat steps 5-7 for the other 7 data bits and the parity
- * 9. Release DATA line
- * 10. Wait for the device to bring DATA low
- * 11. Wait for the device to bring CLOCK low
- * 12. Wait for the device to release DATA and CLOCK (will go high)
- */
-
-// See http://www.avrfreaks.net/index.php?name=PNphpBB2&file=viewtopic&t=134386
-void ps2mouse_sendCommand(uint8_t command) {
-    uint8_t parity_check;
-
-    // Send host-to-device command...
-    cli(); // Disable all interrupts in preparation to command sending
-
-    // Bring the clock line LOW for at least 100 microseconds
-    *cDir |= (1 << cPNum); // Set Clock as output (low)
-    _delay_us(100);
-
-    // Apply a request-to-send by bringing data line low
-    *dDir |= (1 << dPNum); // Set Data as output (low)
-
-    // Release the clock port (set it to floating and give control back)
-    *cDir &= ~(1 << cPNum); // Release Clock line (high)
-
-    // And wait for the device to bring clock line LOW
-    while (*cPin & (1 << cPNum));
-
-    // Now begin send the data bits...
-    parity_check = 1;
-    for (uint8_t bit_idx = 0; bit_idx < 8; bit_idx++) {
-        if (command & 0x01) { // High
-            *dDir &= ~(1 << dPNum); // Release Data line
-
-            parity_check = !parity_check;
-        } else { // Low
-            *dDir |= (1 << dPNum); // Data line set as output (low)
-        }
-
-        command >>= 1;
-
-        // Wait for the device to bring the Clock high and then low
-        while (!(*cPin & (1 << cPNum)));
-        while (*cPin & (1 << cPNum));
-
-        // Send the parity bit
-        if (parity_check) *dDir &= ~(1 << dPNum); // Release Data line (will pull high)
-        else *dDir |= (1 << dPNum); // Data line set as output (low)
-
-        // Wait for the device to bring the clock high and then low
-        while (!(*cPin & (1 << cPNum)));
-        while (*cPin & (1 << cPNum));
-
-        // Parity sent, now set the data high (floating)
-        *dDir &= ~(1 << dPNum); // Release Data
-
-        // Wait for the device to bring the data low
-        while (*dPin & (1 << dPNum));
-        // Wait for the device to bring the clock low
-        while (*cPin & (1 << cPNum));
-
-        // Wait for clock line to get high
-        while (!(*cPin & (1 << cPNum)));
-        // Wait for the data line to get high
-        while (!(*dPin & (1 << dPNum)));
-    }
-
-    // Clear the state for PS/2 communication
-    ps2_state_clear();
-
-    sei();
-}
-
-ISR(INT0_vect) { // Manage INT0
-    uint8_t start_sync_attempts = 50;
-    uint8_t kBit = 0;
-
-    if (clock_edge == CLOCK_FALL) { // Falling edge
-        do { // Synchronize on the start bit
-            _delay_us(1);
-            kBit = (*dPin & (1 << dPNum)) ? 1 : 0;
-        } while((bitCount == 11) && kBit && start_sync_attempts--);
-        if(start_sync_attempts <= 0) return; // Failed the sync...
-
-        // bit 0 is start bit, bit 9,10 are parity and stop bits
-        // What is left are the data bits!
-        if (bitCount < 11 && bitCount > 2) {
-            ps2_data >>= 1; // Shift the data
-
-            if (kBit) ps2_data |= 0x80; // Add a bit if the read data is one
-        } else if (bitCount == 2) { // Parity bit: 1 if there is an even number of 1s in the data bits
-            SET_PARITY_BIT(ps2_flag, kBit);
-        } else if (bitCount == 1) { // Stop bit, must always be 1!
-            SET_STOP_BIT(ps2_flag, kBit);
-        }
-        clock_edge = CLOCK_RISE;			// Ready for rising edge.
-
-#if defined (__AVR_ATmega328P__)
-        EICRA |= ((1 << ISC00) | (1 << ISC01)); // Setup INT0 for rising edge.
-#elif defined (__AVR_ATtiny4313__) || defined (__AVR_ATmega8A__)
-        MCUCR |= ((1 << ISC00) | (1 << ISC01)); // Setup INT0 for rising edge.
-#endif
-    } else { // Rising edge
-        if(!(--bitCount)) {
-            if (STOP_BIT(ps2_flag) && parity_check(ps2_flag, ps2_data)) {
-                pushData(ps2_data);
-            } else { // Ok, something went wrong, wait a bit
-                _delay_ms(100);
+    // wait for some time for mouse self-test to complete
+    for (i = 0; i < ntries; i++) {
+        _delay_ms(250);
+        if (ps2_avail()) {
+            b = ps2_getbyte();
+            if (b == PS2_MOUSE_RESP_RESETOK) {
+                break;
+            } else {
+                i = ntries;
+                break;
             }
-
-            ps2_data = 0;
-            ps2_flag = 0;
-
-            bitCount = PS2_START_BITCOUNT; // Start over.
         }
-        clock_edge = CLOCK_FALL;		// Setup routine the next falling edge.
-
-#if defined (__AVR_ATmega328P__)
-        EICRA &= ~((1 << ISC00) | (1 << ISC01));
-        EICRA |= (1 << ISC01);  // Trigger interrupt at FALLING EDGE (INT0)
-#elif defined (__AVR_ATtiny4313__) || defined (__AVR_ATmega8A__)
-        MCUCR &= ~((1 << ISC00) | (1 << ISC01));
-        MCUCR |= (1 << ISC01);  // Trigger interrupt at FALLING EDGE (INT0)
-#endif
     }
+
+    if (i == ntries) return -1;
+
+    // flush the rest of reponse, most likely mouse id == 0
+    _delay_ms(100);
+    mouse_flush_fast();
+
+    return 0;
+
 }
 
+int16_t mouse_command(uint8_t cmd, uint8_t wait) {
+    int16_t response = -1;
 
+    ps2_sendbyte(cmd);
+    if (wait) {
+        _delay_ms(22);
+        if (ps2_avail()) response = ps2_getbyte();
+    }
+
+    return response;
+}
+
+void mouse_setres(uint8_t res) {
+    mouse_command(PS2_MOUSE_CMD_DISABLE, 1);
+
+    mouse_command(PS2_MOUSE_CMD_SET_RESOLUTION, 1);
+    mouse_command(res, 1); // 0 = 1, 1 = 2, 2 = 4, 3 = 8 counts/mm
+
+    mouse_command(PS2_MOUSE_CMD_ENABLE, 1);
+}
+
+uint8_t mouse_init() {
+    uint8_t buttons = 0;
+
+    ps2_enable_recv(1);
+
+    while(!mouse_reset());
+
+    mouse_command(PS2_MOUSE_CMD_DISABLE, 1);
+    mouse_command(PS2_MOUSE_CMD_SET_DEFAULTS, 1);
+//    mouse_command(PS2_MOUSE_CMD_SCALNG21, 1);
+    mouse_command(PS2_MOUSE_CMD_SCALNG11, 1);
+
+    mouse_command(PS2_MOUSE_CMD_SET_RESOLUTION, 1);
+//    mouse_command(1, 1);             // 0 = 1, 1 = 2, 2 = 4, 3 = 8 counts/mm
+    mouse_command(2, 1);             // 0 = 1, 1 = 2, 2 = 4, 3 = 8 counts/mm
+
+    mouse_command(PS2_MOUSE_CMD_STATREQ, 1);
+    _delay_ms(22);
+
+    if (ps2_avail()) buttons = ps2_getbyte() & 0x07;
+
+    mouse_flush_med();
+
+    mouse_command(PS2_MOUSE_CMD_ENABLE, 1);
+
+    mouse_flush_slow();
+
+    return buttons;
+}
 

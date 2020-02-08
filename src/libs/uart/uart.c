@@ -39,6 +39,27 @@
 
 #define UART_U2X U2X
 
+#elif defined (__AVR_ATmega8A__)
+
+#define UART_UDR                UDR
+#define UART_UCSRA              token_paste2(UCSR, A)
+#define UART_UCSRB              token_paste2(UCSR, B)
+#define UART_UCSRC              token_paste2(UCSR, C)
+#define UART_UBRR               UBRR
+#define UART_UBRRL              token_paste2(UBRR, L)
+#define UART_UBRRH              token_paste2(UBRR, H)
+#define UART_U2X                U2X
+
+#define UART_UDRE               UDRE
+
+#define UART_RXC		RXC
+
+#define UART_RXEN		RXEN
+#define UART_TXEN		TXEN
+
+#define UART_UCSZ0              token_paste2(UCSZ, 0)
+#define UART_UCSZ1              token_paste2(UCSZ, 1)
+
 #else // Not an ATTiny
 
 #define UART_UDR                token_paste2(UDR, UART_NUMBER)
