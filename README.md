@@ -26,7 +26,7 @@ Circuit to adapt a modern mouse to a serial port protocol.
 - D4 - 1n4001 diode
 - D5 - LED
 
-# Headers & Connectors
+### Headers & Connectors
 - J1 - 02x02 2.54mm header
 - J2 - 01x02 2.54mm header
 - J3 - DB9 female connector
