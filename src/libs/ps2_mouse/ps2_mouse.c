@@ -1,5 +1,6 @@
 #include "ps2_mouse.h"
 
+#include <avr/wdt.h>
 #include <util/delay.h>
 
 #include "ps2.h"
@@ -48,8 +49,12 @@ uint8_t mouse_reset(void) {
     ps2_sendbyte(PS2_MOUSE_CMD_RESET);
     ps2_sendbyte(PS2_MOUSE_CMD_RESET);
 
+    // Enable it
+    ps2_sendbyte(PS2_MOUSE_CMD_ENABLE);
+
     // wait for some time for mouse self-test to complete
     for (i = 0; i < ntries; i++) {
+	wdt_reset();
         _delay_ms(250);
         if (ps2_avail()) {
             b = ps2_getbyte();
@@ -99,7 +104,6 @@ uint8_t mouse_init() {
     ps2_enable_recv(1);
 
     while(!mouse_reset());
-
     mouse_command(PS2_MOUSE_CMD_DISABLE, 1);
     mouse_command(PS2_MOUSE_CMD_SET_DEFAULTS, 1);
 //    mouse_command(PS2_MOUSE_CMD_SCALNG21, 1);
