@@ -24,6 +24,11 @@
 #define FLOWDDR  DDRD		// Flow control direction
 #define FLOWRTS  3		// RTS is pin 3
 
+#define LEDPORT	 PORTB
+#define LEDPIN   PINB
+#define LEDDDR   DDRB
+#define LED_P    5
+
 void io_init(void);
 
 #endif /* _IOCONFIG_H_ */
