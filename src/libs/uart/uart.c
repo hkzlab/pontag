@@ -101,7 +101,12 @@ void uart_init(void) {
     UART_UCSRA &= ~(1 << UART_U2X);
 #endif
 
+#if defined (__AVR_ATmega8A__)
+    // ATMega8A requires the msb to be set to 1, otherwise UBRRH is selected
+    UART_UCSRC = 0x80 | (1 << UART_UCSZ1) | (1 << UART_UCSZ0); /* 8-bit data */
+#else
     UART_UCSRC = (1 << UART_UCSZ1) | (1 << UART_UCSZ0); /* 8-bit data */
+#endif
     UART_UCSRB = (1 << UART_RXEN) | (1 << UART_TXEN);   /* Enable RX and TX */
 }
 
