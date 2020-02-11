@@ -27,7 +27,11 @@ int main(void) {
     uint8_t converter_result; // Instanteneous result of the conversion
     uint8_t ps2_buf_counter = 0;
 
+#if defined (__AVR_ATmega328P__)
     wdt_enable(WDTO_4S); // Enable the watchdog to reset in 4 seconds...
+#elif defined (__AVR_ATmega8A__)
+    wdt_enable(WDTO_2S); // Enable the watchdog to reset in 2 seconds...
+#endif
 
     // Initialize the I/O and communications
     io_init();
