@@ -35,8 +35,7 @@ static void mouse_flush_slow(void) {
 }
 
 uint8_t mouse_reset(void) {
-    uint8_t i, b = 33;
-    const uint8_t ntries = 11;
+    uint8_t b;
 
     mouse_flush_fast();
 
@@ -49,32 +48,27 @@ uint8_t mouse_reset(void) {
     ps2_sendbyte(PS2_MOUSE_CMD_RESET);
     ps2_sendbyte(PS2_MOUSE_CMD_RESET);
 
-    // Enable it
-    ps2_sendbyte(PS2_MOUSE_CMD_ENABLE);
+    // Kick the watchdog
+    wdt_reset();
 
     // wait for some time for mouse self-test to complete
-    for (i = 0; i < ntries; i++) {
-	wdt_reset();
+    while (1) {
         _delay_ms(250);
         if (ps2_avail()) {
             b = ps2_getbyte();
             if (b == PS2_MOUSE_RESP_RESETOK) {
                 break;
             } else {
-                i = ntries;
-                break;
+                return 1; // Fail!
             }
         }
     }
-
-    if (i == ntries) return -1;
 
     // flush the rest of reponse, most likely mouse id == 0
     _delay_ms(100);
     mouse_flush_fast();
 
     return 0;
-
 }
 
 int16_t mouse_command(uint8_t cmd, uint8_t wait) {
@@ -103,7 +97,8 @@ uint8_t mouse_init() {
 
     ps2_enable_recv(1);
 
-    while(!mouse_reset());
+    while(mouse_reset());
+    
     mouse_command(PS2_MOUSE_CMD_DISABLE, 1);
     mouse_command(PS2_MOUSE_CMD_SET_DEFAULTS, 1);
 //    mouse_command(PS2_MOUSE_CMD_SCALNG21, 1);
