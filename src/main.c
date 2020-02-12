@@ -19,6 +19,7 @@
 
 #define PS2_PKT_SIZE 3
 
+// This packet is used as autodetection, to notify a Logitech 3 button mouse
 static const uint8_t logitech_detect_pkt[] PROGMEM = "M3"; 
 
 static volatile uint8_t rts_disable_xmit = 0;
@@ -106,7 +107,7 @@ static void rts_init(void) {
 }
 
 ISR(INT1_vect) { // Manage INT1
-    uint8_t count = 50;
+    uint8_t count = 25;
     uint8_t pktb = '\0';
     uint8_t pkt_idx = 0;
 
