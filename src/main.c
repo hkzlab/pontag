@@ -21,6 +21,8 @@
 static volatile uint8_t rts_disable_xmit = 0;
 static void rts_init(void);
 
+static void setLED(uint8_t status);
+
 int main(void) {
     uint8_t serial_pkt_buf[4]; // Buffer for serial packets
     uint8_t ps2_pkt_buf[PS2_PKT_SIZE]; // Buffer for ps/2 packets
@@ -54,10 +56,12 @@ int main(void) {
     converter_status = 0;
     rts_disable_xmit = 0;
 
-    // Initialize the mouse
-    mouse_init();
+    setLED(1); // Turn the LED on
 
-    wdt_reset(); // Another kick
+    mouse_init(); // Initialize the mouse
+    wdt_reset(); // kick the watchdog again...
+
+    setLED(0); // Turn the LED off
 
     while(1) {
         wdt_reset(); // Kick the watchdog
@@ -100,6 +104,11 @@ static void rts_init(void) {
     MCUCR &= ~(1 << ISC11);
     GICR  |= (1 << INT1);
 #endif
+}
+
+static void setLED(uint8_t status) {
+    if(!status) LEDPORT &= ~(_BV(LED_P)); // Turn the LED off
+    else LEDPORT |= _BV(LED_P); // Turn the LED on
 }
 
 ISR(INT1_vect) { // Manage INT1
