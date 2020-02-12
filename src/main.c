@@ -6,7 +6,6 @@
 #include <util/delay.h>
 
 #include <avr/interrupt.h>
-#include <avr/pgmspace.h>
 
 #include "ioconfig.h"
 #include "ps2.h"
@@ -18,9 +17,6 @@
 #include "main.h"
 
 #define PS2_PKT_SIZE 3
-
-// This packet is used as autodetection, to notify a Logitech 3 button mouse
-static const uint8_t logitech_detect_pkt[] PROGMEM = "M3"; 
 
 static volatile uint8_t rts_disable_xmit = 0;
 static void rts_init(void);
@@ -107,19 +103,14 @@ static void rts_init(void) {
 }
 
 ISR(INT1_vect) { // Manage INT1
-    uint8_t count = 25;
-    uint8_t pktb = '\0';
-    uint8_t pkt_idx = 0;
+    uint8_t count = 10;
 
     rts_disable_xmit = 1; // Avoid further transmission from the code in the main loop
 
     while(count--) {
-        // Send the detection packet
-        pktb = pgm_read_byte(&logitech_detect_pkt[pkt_idx++]);
-        while(pktb != '\0') {
-            uart_putchar(pgm_read_byte(pktb), NULL);
-            pktb = pgm_read_byte(&logitech_detect_pkt[pkt_idx++]);
-        }
+	// 'M3' identifies logitech 3 button mouses
+        uart_putchar('M', NULL);
+        uart_putchar('3', NULL);
 
     	_delay_ms(50);
     }
