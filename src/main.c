@@ -107,7 +107,7 @@ static void rts_init(void) {
 
 ISR(INT1_vect) { // Manage INT1
     uint8_t count = 50;
-    uint8_t pktb;
+    uint8_t pktb = '\0';
     uint8_t pkt_idx = 0;
 
     rts_disable_xmit = 1; // Avoid further transmission from the code in the main loop
@@ -115,7 +115,7 @@ ISR(INT1_vect) { // Manage INT1
     while(count--) {
         // Send the detection packet
         pktb = pgm_read_byte(&logitech_detect_pkt[pkt_idx++]);
-        while(detect_byte != NULL) {
+        while(pktb != '\0') {
             uart_putchar(pgm_read_byte(pktb), NULL);
             pktb = pgm_read_byte(&logitech_detect_pkt[pkt_idx++]);
         }
