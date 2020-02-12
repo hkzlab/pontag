@@ -4,7 +4,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <util/delay.h>
+
 #include <avr/interrupt.h>
+#include <avr/pgmspace.h>
 
 #include "ioconfig.h"
 #include "ps2.h"
@@ -16,6 +18,8 @@
 #include "main.h"
 
 #define PS2_PKT_SIZE 3
+
+static const uint8_t logitech_detect_pkt[] PROGMEM = "M3"; 
 
 static volatile uint8_t rts_disable_xmit = 0;
 static void rts_init(void);
@@ -103,9 +107,19 @@ static void rts_init(void) {
 
 ISR(INT1_vect) { // Manage INT1
     uint8_t count = 50;
+    uint8_t pktb;
+    uint8_t pkt_idx = 0;
+
     rts_disable_xmit = 1; // Avoid further transmission from the code in the main loop
+
     while(count--) {
-    	uart_putchar(SER_HELLO_PKT, NULL); // Send the hello packet
+        // Send the detection packet
+        pktb = pgm_read_byte(&logitech_detect_pkt[pkt_idx++]);
+        while(detect_byte != NULL) {
+            uart_putchar(pgm_read_byte(pktb), NULL);
+            pktb = pgm_read_byte(&logitech_detect_pkt[pkt_idx++]);
+        }
+
     	_delay_ms(50);
     }
 

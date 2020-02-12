@@ -3,9 +3,6 @@
 
 #include <stdint.h>
 
-#define SER_HELLO_PKT 'M'
-#define SER_HELLO_DELAY_MS 14
-
 /**
  * This function converts a 3-byte PS/2 mouse packet into a 3 or 4 bytes
  * Microsoft/Logitech serial protocol
