@@ -189,8 +189,7 @@ void ps2_sendbyte(uint8_t byte) {
 
 // Happens every negative PS2 clock transition.
 //
-// ISR_NOBLOCK because nothing here is really critical, while C1351 emulation
-// is really time critical.
+// ISR_NOBLOCK because nothing here is really critical
 ISR(INT0_vect, ISR_NOBLOCK) {
     uint8_t ps2_indat = ps2_datin();
     switch (state) {
