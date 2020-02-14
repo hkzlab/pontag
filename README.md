@@ -8,7 +8,7 @@ PONTAG is a board that converts a PS/2 mouse into a serial mouse that can be use
 
 
 ## Supported protocols
-PONTAG emulates a Logitech 3-buttons serial mouse by default and transmits the `M3` detection string when RTS signal is toggled.
+PONTAG emulates a Microsoft 3-buttons Wheel serial mouse by default and transmits the `0x4D 0x5A 0x40 0x00 0x00 0x00` detection string when RTS signal is toggled.
 
 The boards are tested with [CuteMouse](http://cutemouse.sourceforge.net/).
 
