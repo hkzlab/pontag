@@ -42,7 +42,6 @@ int main(void) {
 
     uint8_t serial_pkt_buf[4]; // Buffer for serial packets
     uint8_t ps2_pkt_buf[PS2_PKT_SIZE]; // Buffer for ps/2 packets
-    uint8_t converter_status; // PS/2 -> Serial conversion state var, used to keep track of state during iteration
     uint8_t converter_result; // Instanteneous result of the conversion
     uint8_t ps2_buf_counter = 0;
 
@@ -77,7 +76,6 @@ int main(void) {
     sei();
 
     // Clear some vars
-    converter_status = 0;
     rts_disable_xmit = 0;
 
     setLED(1); // Turn the LED on
@@ -95,7 +93,7 @@ int main(void) {
             ps2_buf_counter = (ps2_buf_counter + 1) % PS2_PKT_SIZE;
 
             if(!ps2_buf_counter) {
-                converter_result = ps2bufToSer(ps2_pkt_buf, serial_pkt_buf, &converter_status);
+                converter_result = ps2bufToSer(ps2_pkt_buf, serial_pkt_buf);
 
                 if(converter_result && !rts_disable_xmit) {
                     ps2_enable_recv(0); // Ok, stop receiving for now
