@@ -18,10 +18,17 @@
 
 #define PS2_PKT_SIZE 3
 
-static volatile uint8_t rts_disable_xmit = 0;
 static void rts_init(void);
 
 static void setLED(uint8_t status);
+
+static void sendLog3BtnPkt(void);
+static void sendMSPkt(void);
+static void sendMSWheelPkt(void);
+
+// Vars
+static volatile uint8_t rts_disable_xmit = 0;
+static void (* volatile sendDetectPkt)(void) = &sendLog3BtnPkt;
 
 int main(void) {
     uint8_t serial_pkt_buf[4]; // Buffer for serial packets
@@ -43,6 +50,8 @@ int main(void) {
 
     // First watchdog kick
     wdt_reset();
+
+    // TODO: Read the config header here
 
     // Initialize serial port
     uart_init();
@@ -117,9 +126,7 @@ ISR(INT1_vect) { // Manage INT1
     rts_disable_xmit = 1; // Avoid further transmission from the code in the main loop
 
     while(count--) {
-	// 'M3' identifies logitech 3 button mouses
-        uart_putchar('M', NULL);
-        uart_putchar('3', NULL);
+	sendDetectPkt();
 
     	_delay_ms(50);
     }
@@ -127,3 +134,21 @@ ISR(INT1_vect) { // Manage INT1
     rts_disable_xmit = 0; // Allow transmission again
 }
 
+static void sendLog3BtnPkt(void) {
+     // 'M3' identifies logitech 3 button mouses
+     uart_putchar('M', NULL);
+     uart_putchar('3', NULL);
+}
+
+static void sendMSPkt(void) {
+     uart_putchar('M', NULL);
+}
+
+static void sendMSWheelPkt(void) {
+     uart_putchar('M', NULL);
+     uart_putchar('Z', NULL);
+     uart_putchar('@', NULL);
+     uart_putchar(0, NULL);
+     uart_putchar(0, NULL);
+     uart_putchar(0, NULL);
+}
