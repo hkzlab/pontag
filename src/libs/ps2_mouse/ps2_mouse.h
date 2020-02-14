@@ -26,12 +26,17 @@
 #define PS2_MOUSE_CMD_RESEND 0xfe
 #define PS2_MOUSE_CMD_RESET 0xff
 
+
+#define MOUSE_EXT_MASK 0x08
+#define MOUSE_BTN_MASK 0x07
+
 /**
  * Resets, initializes and configures the mouse
  * @param ext If != 0 enable the check for a PS/2++ compatible mouse
  * @return The status of the buttons in the 3 Least Significant Bits, 0 in the 4th bit if a normal mouse is detected, 1 if a PS/2++ compatible mouse is detected
  */
 uint8_t mouse_init(uint8_t ext);
+
 uint8_t mouse_reset(void);
 int16_t mouse_command(uint8_t cmd, uint8_t wait);
 void mouse_setres(uint8_t res);

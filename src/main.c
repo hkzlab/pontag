@@ -44,6 +44,7 @@ int main(void) {
     uint8_t ps2_pkt_buf[PS2_PKT_SIZE]; // Buffer for ps/2 packets
     uint8_t converter_result; // Instanteneous result of the conversion
     uint8_t ps2_buf_counter = 0;
+    uint8_t mouse_ext = 0; // Is the mouse PS/2++ compatible?
 
 #if defined (__AVR_ATmega328P__)
     wdt_enable(WDTO_4S); // Enable the watchdog to reset in 4 seconds...
@@ -80,7 +81,7 @@ int main(void) {
 
     setLED(1); // Turn the LED on
 
-    mouse_init(!opts.u.msproto); // Initialize the mouse
+    mouse_ext = mouse_init(!opts.u.msproto) & MOUSE_EXT_MASK; // Initialize the mouse
     wdt_reset(); // kick the watchdog again...
 
     setLED(0); // Turn the LED off

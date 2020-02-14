@@ -133,5 +133,5 @@ uint8_t mouse_init(uint8_t ext) {
 }
 
 static void mouse_sendSequence(const uint8_t *seq, uint8_t length) {
-    for(uint8_t idx = 0; idx < length; idx++) ps2_sendByte(seq[idx]);
+    for(uint8_t idx = 0; idx < length; idx++) ps2_sendbyte(seq[idx]);
 }
