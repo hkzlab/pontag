@@ -5,6 +5,15 @@
 
 #include "ps2.h"
 
+static const uint8_t ps2pp_magicKnock[] = { 0xE8, 0x00,
+                                            0xE8, 0x03,
+                                            0xE8, 0x02,
+                                            0xE8, 0x01,
+                                            0xE6,
+                                            0xE8, 0x03,
+                                            0xE8, 0x01,
+                                            0xE8, 0x02,
+                                            0xE8, 0x03 };
 
 static void mouse_flush_fast(void);
 static void mouse_flush_med(void);
