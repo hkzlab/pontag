@@ -29,6 +29,11 @@
 #define LEDDDR   DDRB
 #define LED_P    5
 
+// PC0-5 are used as option header
+#define OPTPORT  PORTC
+#define OPTPIN   PINC
+#define OPTDDR   DDRC
+
 void io_init(void);
 
 #endif /* _IOCONFIG_H_ */

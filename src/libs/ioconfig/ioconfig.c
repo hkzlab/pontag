@@ -14,6 +14,9 @@ void io_init() {
 
     FLOWPORT &= ~(_BV(FLOWRTS)); // Disable pullup on RTS
     FLOWDDR &= ~(_BV(FLOWRTS)); // Make RTS an input
+
+    // Setup the option header
+    OPTDDR &= 0xC0; // PC0-5 as inputs
+    OPTPORT |= 0x3F; // Enable pullups on PC0-5
 }
 
-//$Id$
