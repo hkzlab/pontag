@@ -112,7 +112,8 @@ uint8_t mouse_init(uint8_t ext) {
     while(mouse_reset());
 
     if(ext) {
-
+        mouse_sendSequence(ps2pp_magicKnock, sizeof(ps2pp_magicKnock));
+        // TODO: Read the response
     }
     
     mouse_command(PS2_MOUSE_CMD_DISABLE, 1);
@@ -139,5 +140,5 @@ uint8_t mouse_init(uint8_t ext) {
 }
 
 static void mouse_sendSequence(const uint8_t *seq, uint8_t length) {
-    for(uint8_t idx = 0; idx < length; idx++) ps2_sendbyte(pgm_read_byte(&seq[idx]));
+   for(uint8_t idx = 0; idx < length; idx++) ps2_sendbyte(pgm_read_byte(&seq[idx]));
 }
