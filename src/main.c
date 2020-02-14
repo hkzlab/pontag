@@ -18,6 +18,14 @@
 
 #define PS2_PKT_SIZE 3
 
+typedef union {
+    struct {
+        uint8_t simple_mouse : 1;
+	uint8_t unused : 5;
+    } u;
+    uint8_t header;
+} Options;
+
 static void rts_init(void);
 
 static void setLED(uint8_t status);
@@ -31,6 +39,8 @@ static volatile uint8_t rts_disable_xmit = 0;
 static void (* volatile sendDetectPkt)(void) = &sendLog3BtnPkt;
 
 int main(void) {
+    Options opts;
+
     uint8_t serial_pkt_buf[4]; // Buffer for serial packets
     uint8_t ps2_pkt_buf[PS2_PKT_SIZE]; // Buffer for ps/2 packets
     uint8_t converter_status; // PS/2 -> Serial conversion state var, used to keep track of state during iteration
@@ -47,6 +57,9 @@ int main(void) {
     io_init();
     rts_init();
     ps2_init();
+
+    // Read the option header
+    opts.header = OPTPIN;
 
     // First watchdog kick
     wdt_reset();
