@@ -18,6 +18,7 @@ static const uint8_t ps2pp_magicKnock[] = { 0xE8, 0x00,
 static void mouse_flush_fast(void);
 static void mouse_flush_med(void);
 static void mouse_flush_slow(void);
+static void mouse_sendSequence(const uint8_t *seq, uint8_t length);
 
 static void mouse_flush_fast(void) {
     _delay_ms(0);
@@ -131,3 +132,6 @@ uint8_t mouse_init() {
     return buttons;
 }
 
+static void mouse_sendSequence(const uint8_t *seq, uint8_t length) {
+    for(uint8_t idx = 0; idx < length; idx++) ps2_sendByte(seq[idx]);
+}
