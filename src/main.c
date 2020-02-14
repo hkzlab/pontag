@@ -30,13 +30,12 @@ static void rts_init(void);
 
 static void setLED(uint8_t status);
 
-static void sendLog3BtnPkt(void);
 static void sendMSPkt(void);
 static void sendMSWheelPkt(void);
 
 // Vars
 static volatile uint8_t rts_disable_xmit = 0;
-static void (* volatile sendDetectPkt)(void) = &sendLog3BtnPkt;
+static void (* volatile sendDetectPkt)(void) = &sendMSWheelPkt;
 
 int main(void) {
     Options opts;
@@ -55,11 +54,14 @@ int main(void) {
 
     // Initialize the I/O and communications
     io_init();
-    rts_init();
-    ps2_init();
-
+    
     // Read the option header
     opts.header = OPTPIN;
+    if(opts.u.simple_mouse) sendDetectPkt = sendMSPkt; // Else will remain the default
+
+    // Initialize RTS interrupt and PS2
+    rts_init();
+    ps2_init();
 
     // First watchdog kick
     wdt_reset();
@@ -103,7 +105,7 @@ int main(void) {
                     uart_putchar(serial_pkt_buf[0], NULL);
                     uart_putchar(serial_pkt_buf[1], NULL);
                     uart_putchar(serial_pkt_buf[2], NULL);
-                    if(converter_result & 0x02) uart_putchar(serial_pkt_buf[3], NULL); // Send the fourth byte, according to the Logitech serial protocol
+                    if(!opts.u.simple_mouse) uart_putchar(serial_pkt_buf[3], NULL); // Send the fourth byte, according to the Microsoft Wheel mouse specs
 
                     ps2_enable_recv(1); // Back to getting data!
                 }
@@ -145,12 +147,6 @@ ISR(INT1_vect) { // Manage INT1
     }
 
     rts_disable_xmit = 0; // Allow transmission again
-}
-
-static void sendLog3BtnPkt(void) {
-     // 'M3' identifies logitech 3 button mouses
-     uart_putchar('M', NULL);
-     uart_putchar('3', NULL);
 }
 
 static void sendMSPkt(void) {
