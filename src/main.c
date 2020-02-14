@@ -20,7 +20,7 @@
 
 typedef union {
     struct {
-        uint8_t simple_mouse : 1;
+        uint8_t msproto : 1;
 	uint8_t unused : 5;
     } u;
     uint8_t header;
@@ -56,7 +56,7 @@ int main(void) {
     
     // Read the option header
     opts.header = OPTPIN;
-    if(opts.u.simple_mouse) sendDetectPkt = sendMSPkt; // Else will remain the default
+    if(!opts.u.msproto) sendDetectPkt = sendMSPkt; // Else will remain the default
 
     // Initialize RTS interrupt and PS2
     rts_init();
@@ -103,7 +103,7 @@ int main(void) {
                     uart_putchar(serial_pkt_buf[0], NULL);
                     uart_putchar(serial_pkt_buf[1], NULL);
                     uart_putchar(serial_pkt_buf[2], NULL);
-                    if(!opts.u.simple_mouse) uart_putchar(serial_pkt_buf[3], NULL); // Send the fourth byte, according to the Microsoft Wheel mouse specs
+                    if(opts.u.msproto) uart_putchar(serial_pkt_buf[3], NULL); // Send the fourth byte, according to the Microsoft Wheel mouse specs
 
                     ps2_enable_recv(1); // Back to getting data!
                 }
@@ -155,7 +155,7 @@ static void sendMSWheelPkt(void) {
      uart_putchar('M', NULL);
      uart_putchar('Z', NULL);
      uart_putchar('@', NULL);
-     uart_putchar(0, NULL);
-     uart_putchar(0, NULL);
-     uart_putchar(0, NULL);
+     uart_putchar(0x00, NULL);
+     uart_putchar(0x00, NULL);
+     uart_putchar(0x00, NULL);
 }
