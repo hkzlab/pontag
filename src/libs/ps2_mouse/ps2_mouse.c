@@ -1,19 +1,21 @@
 #include "ps2_mouse.h"
 
 #include <avr/wdt.h>
+#include <avr/pgmspace.h>
+
 #include <util/delay.h>
 
 #include "ps2.h"
 
-static const uint8_t ps2pp_magicKnock[] = { 0xE8, 0x00,
-                                            0xE8, 0x03,
-                                            0xE8, 0x02,
-                                            0xE8, 0x01,
-                                            0xE6,
-                                            0xE8, 0x03,
-                                            0xE8, 0x01,
-                                            0xE8, 0x02,
-                                            0xE8, 0x03 };
+static const uint8_t ps2pp_magicKnock[] PROGMEM = { 0xE8, 0x00,
+                                                    0xE8, 0x03,
+                                                    0xE8, 0x02,
+                                                    0xE8, 0x01,
+                                                    0xE6,
+                                                    0xE8, 0x03,
+                                                    0xE8, 0x01,
+                                                    0xE8, 0x02,
+                                                    0xE8, 0x03 };
 
 static void mouse_flush_fast(void);
 static void mouse_flush_med(void);
@@ -108,6 +110,10 @@ uint8_t mouse_init(uint8_t ext) {
     ps2_enable_recv(1);
 
     while(mouse_reset());
+
+    if(ext) {
+
+    }
     
     mouse_command(PS2_MOUSE_CMD_DISABLE, 1);
     mouse_command(PS2_MOUSE_CMD_SET_DEFAULTS, 1);
@@ -133,5 +139,5 @@ uint8_t mouse_init(uint8_t ext) {
 }
 
 static void mouse_sendSequence(const uint8_t *seq, uint8_t length) {
-    for(uint8_t idx = 0; idx < length; idx++) ps2_sendbyte(seq[idx]);
+    for(uint8_t idx = 0; idx < length; idx++) ps2_sendbyte(pgm_read_byte(&seq[idx]));
 }

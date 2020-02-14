@@ -1,10 +1,11 @@
 #include <stdint.h>
-#include <avr/io.h>
-#include <avr/wdt.h>
 #include <stdio.h>
 #include <stdlib.h>
+
 #include <util/delay.h>
 
+#include <avr/io.h>
+#include <avr/wdt.h>
 #include <avr/interrupt.h>
 
 #include "ioconfig.h"
