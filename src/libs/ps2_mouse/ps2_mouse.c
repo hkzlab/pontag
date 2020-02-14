@@ -102,8 +102,8 @@ void mouse_setres(uint8_t res) {
     mouse_command(PS2_MOUSE_CMD_ENABLE, 1);
 }
 
-uint8_t mouse_init() {
-    uint8_t buttons = 0;
+uint8_t mouse_init(uint8_t ext) {
+    uint8_t retval = 0;
 
     ps2_enable_recv(1);
 
@@ -121,7 +121,7 @@ uint8_t mouse_init() {
     mouse_command(PS2_MOUSE_CMD_STATREQ, 1);
     _delay_ms(22);
 
-    if (ps2_avail()) buttons = ps2_getbyte() & 0x07;
+    if (ps2_avail()) retval |= (ps2_getbyte() & 0x07);
 
     mouse_flush_med();
 
@@ -129,7 +129,7 @@ uint8_t mouse_init() {
 
     mouse_flush_slow();
 
-    return buttons;
+    return retval;
 }
 
 static void mouse_sendSequence(const uint8_t *seq, uint8_t length) {

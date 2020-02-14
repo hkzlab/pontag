@@ -80,7 +80,7 @@ int main(void) {
 
     setLED(1); // Turn the LED on
 
-    mouse_init(); // Initialize the mouse
+    mouse_init(!opts.u.msproto); // Initialize the mouse
     wdt_reset(); // kick the watchdog again...
 
     setLED(0); // Turn the LED off
