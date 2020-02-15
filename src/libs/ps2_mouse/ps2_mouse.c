@@ -100,7 +100,7 @@ void mouse_setres(uint8_t res) {
     mouse_command(PS2_MOUSE_CMD_ENABLE, 1);
 }
 
-uint8_t mouse_init(uint8_t ext) {
+uint8_t mouse_init(uint8_t res) {
     uint8_t retval = 0;
 
     ps2_enable_recv(1);
@@ -112,7 +112,7 @@ uint8_t mouse_init(uint8_t ext) {
     mouse_command(PS2_MOUSE_CMD_SCALNG11, 1);
 
     mouse_command(PS2_MOUSE_CMD_SET_RESOLUTION, 1);
-    mouse_command(2, 1);             // 0 = 1, 1 = 2, 2 = 4, 3 = 8 counts/mm
+    mouse_command(res, 1); // 0 = 1, 1 = 2, 2 = 4, 3 = 8 counts/mm
 
     int16_t sreq = mouse_command(PS2_MOUSE_CMD_STATREQ, 1);
     if(sreq >= 0) retval |= sreq & MOUSE_BTN_MASK;
@@ -121,13 +121,11 @@ uint8_t mouse_init(uint8_t ext) {
 
     wdt_reset();
 
-    if(ext) {
-        mouse_sendSequence(ps2_wheel_sequence, sizeof(ps2_wheel_sequence));
-        mouse_flush_med();
-
-        int16_t id = mouse_command(PS2_MOUSE_CMD_READID, 1);
-        if(id == MOUSE_ID_WHEEL) retval |= MOUSE_EXT_MASK;
-    }
+    // Check for mouse wheel
+    mouse_sendSequence(ps2_wheel_sequence, sizeof(ps2_wheel_sequence));
+    mouse_flush_med();
+    int16_t id = mouse_command(PS2_MOUSE_CMD_READID, 1);
+    if(id == MOUSE_ID_WHEEL) retval |= MOUSE_EXT_MASK;
 
     mouse_command(PS2_MOUSE_CMD_ENABLE, 1);
 

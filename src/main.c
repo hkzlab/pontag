@@ -32,8 +32,10 @@ typedef union {
 static void rts_init(void);
 
 static void setLED(uint8_t status);
-static void blinkLED(uint8_t times); // Blink the led X times with a delay of 25msec
+static void blinkLED(uint8_t times, uint8_t fast); // Blink the led X times either fast (50ms) or slow (100ms)
 static void soft_reset(void);
+
+static void update_configuration(uint8_t buttons, ConfigStruct *cfg);
 
 static void sendMSPkt(void);
 static void sendMSWheelPkt(void);
@@ -53,6 +55,8 @@ int main(void) {
     uint8_t init_res = 0; // Init codes
     uint8_t ps2_pkt_size = 0;
 
+    uint8_t cfg_force_ms = 0;
+
 #if defined (__AVR_ATmega328P__)
     wdt_enable(WDTO_4S); // Enable the watchdog to reset in 4 seconds...
 #elif defined (__AVR_ATmega8A__)
@@ -64,10 +68,15 @@ int main(void) {
 
     // Read the option header
     opts.header = OPTPIN;
-    if(!opts.u.wheel_proto) sendDetectPkt = sendMSPkt; // Else will remain the default
-
     // Read the config from EEPROM
     read_perm_config(&cfg);
+    
+    // Option header always wins over stored config
+    if(!opts.u.wheel_proto || cfg.cfg_data.c.proto) cfg_force_ms = 1; // We're enforcing simple Microsoft protocol
+    else cfg_force_ms = 0; // Enable mouse wheel protocol
+
+    // Set which type of identification code we'll send
+    if(cfg_force_ms) sendDetectPkt = sendMSPkt;
 
     // Initialize RTS interrupt and PS2
     rts_init();
@@ -89,7 +98,10 @@ int main(void) {
 
     setLED(1); // Turn the LED on
 
-    init_res = mouse_init(opts.u.wheel_proto); // Initialize the mouse
+    init_res = mouse_init(cfg.cfg_data.c.res); // Initialize the mouse
+
+    // Check if we need to update the configuration
+    update_configuration(init_res & MOUSE_BTN_MASK, &cfg);
 
     // Set the PS/2 packet size
     if(init_res & MOUSE_EXT_MASK) ps2_pkt_size = PS2_WHL_PKT_SIZE;
@@ -98,8 +110,8 @@ int main(void) {
     wdt_reset(); // kick the watchdog again...
 
     // Notify which mouse we found
-    if(init_res & MOUSE_EXT_MASK) blinkLED(20);
-    else blinkLED(5);
+    if(init_res & MOUSE_EXT_MASK) blinkLED(20, 1);
+    else blinkLED(5, 1);
 
     while(1) {
         wdt_reset(); // Kick the watchdog
@@ -122,7 +134,7 @@ int main(void) {
                     uart_putchar(serial_pkt_buf[0], NULL);
                     uart_putchar(serial_pkt_buf[1], NULL);
                     uart_putchar(serial_pkt_buf[2], NULL);
-                    if(opts.u.wheel_proto) uart_putchar(serial_pkt_buf[3], NULL); // Send the fourth byte, according to the Microsoft Wheel mouse specs
+                    if(!cfg_force_ms) uart_putchar(serial_pkt_buf[3], NULL); // Send the fourth byte, according to the Microsoft Wheel mouse specs
 
                     ps2_enable_recv(1); // Back to getting data!
                 }
@@ -152,16 +164,16 @@ static void setLED(uint8_t status) {
     else LEDPORT |= _BV(LED_P); // Turn the LED on
 }
 
-static void blinkLED(uint8_t times) {
+static void blinkLED(uint8_t times, uint8_t fast) {
     setLED(0);
 
     while(times--) {
         wdt_reset();
 
         setLED(1);
-        _delay_ms(50);
+        fast ? _delay_ms(50) : _delay_ms(100);
         setLED(0);
-        _delay_ms(50);
+        fast ? _delay_ms(50) : _delay_ms(100);
     }
 }
 
@@ -185,6 +197,32 @@ static void sendMSWheelPkt(void) {
     uart_putchar(0x00, NULL);
     uart_putchar(0x00, NULL);
     uart_putchar(0x00, NULL);
+}
+
+static void update_configuration(uint8_t buttons, ConfigStruct *cfg) {
+    switch(buttons & 0x05) { // Ignore middle button for now
+        case 5: // Both buttons pressed, reset to defaults
+            reset_perm_config(cfg);
+            write_perm_config(cfg);
+            blinkLED(15, 0);
+            soft_reset();
+            break;
+        case 4: // Left button, change protocol
+            cfg->cfg_data.c.proto = !(cfg->cfg_data.c.proto);
+            write_perm_config(cfg);
+            blinkLED(15, 0);
+            soft_reset();
+            break;
+        case 1: // Right button, change resolution
+            cfg->cfg_data.c.res = (cfg->cfg_data.c.res + 1) % 4;
+            write_perm_config(cfg);
+            blinkLED(15, 0);
+            soft_reset();
+            break;
+        case 0: // Nothing to do
+        default:
+            break;   
+    }
 }
 
 static void soft_reset(void) {

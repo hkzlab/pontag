@@ -14,5 +14,6 @@ typedef struct {
 
 uint8_t read_perm_config(ConfigStruct *cfg);
 void write_perm_config(ConfigStruct *cfg);
+void reset_perm_config(ConfigStruct *cfg);
 
 #endif /*_PCONFIG_HEADER_*/
