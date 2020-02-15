@@ -7,15 +7,10 @@
 
 #include "ps2.h"
 
-static const uint8_t ps2pp_magicKnock[] PROGMEM = { 0xE8, 0x00,
-                                                    0xE8, 0x03,
-                                                    0xE8, 0x02,
-                                                    0xE8, 0x01,
-                                                    0xE6,
-                                                    0xE8, 0x03,
-                                                    0xE8, 0x01,
-                                                    0xE8, 0x02,
-                                                    0xE8, 0x03 };
+// This sequence will enable wheel mode and 4 bytes mode, where supported
+static const uint8_t ps2_wheel_sequence[] PROGMEM = { 0xF3, 0xC8,
+                                                      0xF3, 0x64,
+                                                      0xF3, 0x50 };
 
 static void mouse_flush_fast(void);
 static void mouse_flush_med(void);
@@ -121,9 +116,19 @@ uint8_t mouse_init(uint8_t ext) {
     mouse_command(2, 1);             // 0 = 1, 1 = 2, 2 = 4, 3 = 8 counts/mm
 
     int16_t sreq = mouse_command(PS2_MOUSE_CMD_STATREQ, 1);
-    if(sreq >= 0) retval |= sreq & 0x07;
+    if(sreq >= 0) retval |= sreq & MOUSE_BTN_MASK;
 
     mouse_flush_med();
+
+    wdt_reset();
+
+    if(ext) {
+        mouse_sendSequence(ps2_wheel_sequence, sizeof(ps2_wheel_sequence));
+        mouse_flush_med();
+        
+        int16_t id = mouse_command(PS2_MOUSE_CMD_READID, 1);
+        if(id == MOUSE_ID_WHEEL) retval |= MOUSE_EXT_MASK;
+    }
 
     mouse_command(PS2_MOUSE_CMD_ENABLE, 1);
 
@@ -133,5 +138,7 @@ uint8_t mouse_init(uint8_t ext) {
 }
 
 static void mouse_sendSequence(const uint8_t *seq, uint8_t length) {
-   for(uint8_t idx = 0; idx < length; idx++) ps2_sendbyte(pgm_read_byte(&seq[idx]));
+   for(uint8_t idx = 0; idx < length; idx++) {
+       ps2_sendbyte(pgm_read_byte(&seq[idx]));
+   }
 }

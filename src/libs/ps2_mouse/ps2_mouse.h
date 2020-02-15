@@ -30,6 +30,9 @@
 #define MOUSE_EXT_MASK 0x08
 #define MOUSE_BTN_MASK 0x07
 
+#define MOUSE_ID_STANDARD 0x00
+#define MOUSE_ID_WHEEL 0x03
+
 /**
  * Resets, initializes and configures the mouse
  * @param ext If != 0 enable the check for a PS/2++ compatible mouse
