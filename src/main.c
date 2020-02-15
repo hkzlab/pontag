@@ -146,14 +146,10 @@ static void setLED(uint8_t status) {
 }
 
 ISR(INT1_vect) { // Manage INT1
-    uint8_t count = 10;
-
     rts_disable_xmit = 1; // Avoid further transmission from the code in the main loop
-
-    while(count--) {
-	     sendDetectPkt();
-    	_delay_ms(50);
-    }
+	
+    sendDetectPkt();
+    _delay_ms(10);
 
     rts_disable_xmit = 0; // Allow transmission again
 }
