@@ -107,7 +107,10 @@ int main(void) {
                 if(converter_result && !rts_disable_xmit) {
                     ps2_enable_recv(0); // Ok, stop receiving for now
 
+                    // debug prints
                     //printf("%.2X %.2X %.2X\n", ps2_pkt_buf[0], ps2_pkt_buf[1], ps2_pkt_buf[2]);
+                    //printf("ser -> %.2X %.2X %.2X %.2X\n", serial_pkt_buf[0], serial_pkt_buf[1], serial_pkt_buf[2], serial_pkt_buf[3]);
+                    
                     // Transmit the converted data to the serial port
                     uart_putchar(serial_pkt_buf[0], NULL);
                     uart_putchar(serial_pkt_buf[1], NULL);
@@ -148,8 +151,7 @@ ISR(INT1_vect) { // Manage INT1
     rts_disable_xmit = 1; // Avoid further transmission from the code in the main loop
 
     while(count--) {
-	sendDetectPkt();
-
+	     sendDetectPkt();
     	_delay_ms(50);
     }
 
