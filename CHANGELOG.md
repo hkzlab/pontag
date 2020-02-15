@@ -1,5 +1,8 @@
 # Changelog
 ## 1.0 branch
+### 1.1.1 (2020.02.15)
+- **FIX**: Correctly read device id even if the device sends an 0xFA or an 0xFC before the actual response
+
 ### 1.1.0 (2020.02.15)
 - **FIX**: Correctly read mouse status even if the device sends an 0xFA (ACK) before the actual response
 
