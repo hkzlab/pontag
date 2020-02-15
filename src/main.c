@@ -17,7 +17,8 @@
 
 #include "main.h"
 
-#define PS2_PKT_SIZE 3
+#define PS2_WHL_PKT_SIZE 4
+#define PS2_STD_PKT_SIZE 3
 
 typedef union {
     struct {
@@ -42,10 +43,11 @@ int main(void) {
     Options opts;
 
     uint8_t serial_pkt_buf[4]; // Buffer for serial packets
-    uint8_t ps2_pkt_buf[PS2_PKT_SIZE]; // Buffer for ps/2 packets
+    uint8_t ps2_pkt_buf[PS2_WHL_PKT_SIZE] = {0x00, 0x00, 0x00, 0x00}; // Buffer for ps/2 packets
     uint8_t converter_result; // Instanteneous result of the conversion
     uint8_t ps2_buf_counter = 0;
     uint8_t mouse_ext = 0; // Is the mouse PS/2++ compatible?
+    uint8_t ps2_pkt_size = 0;
 
 #if defined (__AVR_ATmega328P__)
     wdt_enable(WDTO_4S); // Enable the watchdog to reset in 4 seconds...
@@ -83,6 +85,11 @@ int main(void) {
     setLED(1); // Turn the LED on
 
     mouse_ext = mouse_init(opts.u.msproto) & MOUSE_EXT_MASK; // Initialize the mouse
+
+    // Set the PS/2 packet size
+    if(mouse_ext) ps2_pkt_size = PS2_WHL_PKT_SIZE;
+    else ps2_pkt_size = PS2_STD_PKT_SIZE;
+
     wdt_reset(); // kick the watchdog again...
 
     setLED(0); // Turn the LED off
@@ -92,7 +99,7 @@ int main(void) {
 
         while(ps2_avail()) {
             ps2_pkt_buf[ps2_buf_counter] = ps2_getbyte();
-            ps2_buf_counter = (ps2_buf_counter + 1) % PS2_PKT_SIZE;
+            ps2_buf_counter = (ps2_buf_counter + 1) % ps2_pkt_size;
 
             if(!ps2_buf_counter) {
                 converter_result = ps2bufToSer(ps2_pkt_buf, serial_pkt_buf);
