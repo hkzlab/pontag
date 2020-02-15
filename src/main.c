@@ -12,6 +12,7 @@
 #include "ps2.h"
 #include "ps2_mouse.h"
 #include "ps22ser.h"
+#include "pconfig.h"
 
 #include "uart.h"
 
@@ -23,7 +24,7 @@
 typedef union {
     struct {
         uint8_t msproto : 1;
-	uint8_t unused : 5;
+	    uint8_t unused : 5;
     } u;
     uint8_t header;
 } Options;
@@ -150,13 +151,14 @@ static void setLED(uint8_t status) {
 
 static void blinkLED(uint8_t times) {
     setLED(0);
+
     while(times--) {
-         wdt_reset();
+        wdt_reset();
          
-         setLED(1);
-         _delay_ms(50);
-         setLED(0);
-         _delay_ms(50);
+        setLED(1);
+        _delay_ms(50);
+        setLED(0);
+        _delay_ms(50);
     }
 }
 
@@ -170,14 +172,14 @@ ISR(INT1_vect) { // Manage INT1
 }
 
 static void sendMSPkt(void) {
-     uart_putchar('M', NULL);
+    uart_putchar('M', NULL);
 }
 
 static void sendMSWheelPkt(void) {
-     uart_putchar('M', NULL);
-     uart_putchar('Z', NULL);
-     uart_putchar('@', NULL);
-     uart_putchar(0x00, NULL);
-     uart_putchar(0x00, NULL);
-     uart_putchar(0x00, NULL);
+    uart_putchar('M', NULL);
+    uart_putchar('Z', NULL);
+    uart_putchar('@', NULL);
+    uart_putchar(0x00, NULL);
+    uart_putchar(0x00, NULL);
+    uart_putchar(0x00, NULL);
 }
