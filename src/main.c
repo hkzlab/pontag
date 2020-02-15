@@ -27,7 +27,7 @@ typedef union {
         uint8_t unused : 5;
     } u;
     uint8_t header;
-} Options;
+} HeaderOptions;
 
 static void rts_init(void);
 
@@ -42,13 +42,14 @@ static volatile uint8_t rts_disable_xmit = 0;
 static void (* volatile sendDetectPkt)(void) = &sendMSWheelPkt;
 
 int main(void) {
-    Options opts;
+    HeaderOptions opts;
+    ConfigStruct cfg;
 
     uint8_t serial_pkt_buf[4]; // Buffer for serial packets
     uint8_t ps2_pkt_buf[PS2_WHL_PKT_SIZE] = {0x00, 0x00, 0x00, 0x00}; // Buffer for ps/2 packets
     uint8_t converter_result; // Instanteneous result of the conversion
     uint8_t ps2_buf_counter = 0;
-    uint8_t mouse_ext = 0; // Is the mouse PS/2++ compatible?
+    uint8_t init_res = 0; // Init codes
     uint8_t ps2_pkt_size = 0;
 
 #if defined (__AVR_ATmega328P__)
@@ -64,14 +65,15 @@ int main(void) {
     opts.header = OPTPIN;
     if(!opts.u.wheel_proto) sendDetectPkt = sendMSPkt; // Else will remain the default
 
+    // Read the config from EEPROM
+    read_perm_config(&cfg);
+
     // Initialize RTS interrupt and PS2
     rts_init();
     ps2_init();
 
     // First watchdog kick
     wdt_reset();
-
-    // TODO: Read the config header here
 
     // Initialize serial port
     uart_init();
@@ -86,16 +88,16 @@ int main(void) {
 
     setLED(1); // Turn the LED on
 
-    mouse_ext = mouse_init(opts.u.wheel_proto) & MOUSE_EXT_MASK; // Initialize the mouse
+    init_res = mouse_init(opts.u.wheel_proto); // Initialize the mouse
 
     // Set the PS/2 packet size
-    if(mouse_ext) ps2_pkt_size = PS2_WHL_PKT_SIZE;
+    if(init_res & MOUSE_EXT_MASK) ps2_pkt_size = PS2_WHL_PKT_SIZE;
     else ps2_pkt_size = PS2_STD_PKT_SIZE;
 
     wdt_reset(); // kick the watchdog again...
 
     // Notify which mouse we found
-    if(mouse_ext) blinkLED(20);
+    if(init_res & MOUSE_EXT_MASK) blinkLED(20);
     else blinkLED(5);
 
     while(1) {
