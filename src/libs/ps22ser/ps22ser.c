@@ -15,7 +15,8 @@ uint8_t ps2bufToSer(const uint8_t *src, uint8_t *dst) {
     // Now handle the middle one
     dst[3] |= (src[0] & 0x04) << 2; // Set the value of the 4th byte
 
-    // TODO: Mouse wheel
+    // Mouse wheel
+    dst[3] |= (src[3] & 0x0F); // Just copy the 4 bits necessary for wheels
 
     // PS/2 has 9-bit two's complement notation
     // Serial (microsoft) has 8-bit two's complement notation
