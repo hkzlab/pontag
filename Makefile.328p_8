@@ -44,7 +44,7 @@ FORMAT = ihex
 TARGET = out/pontag
 
 # List C source files here. (C dependencies are automatically generated.)
-SRC = src/main.c src/libs/ps2/ps2.c src/libs/ps2_mouse/ps2_mouse.c src/libs/ioconfig/ioconfig.c src/libs/uart/uart.c src/libs/ps22ser/ps22ser.c
+SRC = src/main.c src/libs/ps2/ps2.c src/libs/ps2_mouse/ps2_mouse.c src/libs/ioconfig/ioconfig.c src/libs/uart/uart.c src/libs/ps22ser/ps22ser.c src/libs/pconfig/pconfig.c
 
 # List Assembler source files here.
 #     Make them always end in a capital .S.  Files ending in a lowercase .s
@@ -93,7 +93,7 @@ CDEFS = -DF_CPU=$(F_CPU)UL
 
 
 # Place -I options here
-CINCS = -Isrc/libs/ -Isrc/libs/ps2/ -Isrc/libs/ps2_mouse/ -Isrc/libs/ioconfig/ -Isrc/libs/uart/ -Isrc/libs/ps22ser/
+CINCS = -Isrc/libs/ -Isrc/libs/ps2/ -Isrc/libs/ps2_mouse/ -Isrc/libs/ioconfig/ -Isrc/libs/uart/ -Isrc/libs/ps22ser/ -Isrc/libs/pconfig/
 
 
 #---------------- Compiler Options ----------------
