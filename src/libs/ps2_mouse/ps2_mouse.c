@@ -17,6 +17,7 @@ static void mouse_flush_fast(void);
 static void mouse_flush_med(void);
 static void mouse_flush_slow(void);
 static uint8_t mouse_get_status(void);
+static uint8_t mouse_get_id(void);
 static void mouse_sendSequence(const uint8_t *seq, uint8_t length);
 
 static void mouse_flush_fast(void) {
@@ -129,7 +130,7 @@ uint8_t mouse_init(uint8_t res) {
     // Check for mouse wheel
     mouse_sendSequence(ps2_wheel_sequence, sizeof(ps2_wheel_sequence));
     mouse_flush_med();
-    int16_t id = mouse_command(PS2_MOUSE_CMD_READID, 1);
+    uint8_t id = mouse_get_id();
     if(id == MOUSE_ID_WHEEL) retval |= MOUSE_EXT_MASK;
 
     mouse_command(PS2_MOUSE_CMD_ENABLE, 1);
@@ -159,4 +160,21 @@ static uint8_t mouse_get_status(void) {
     }
 
     return sreq;
+}
+
+static uint8_t mouse_get_id(void) {
+    uint8_t id;
+
+    mouse_command(PS2_MOUSE_CMD_READID, 0);
+    while(1) { // Loop until we get what we want or we die!
+        _delay_ms(20);
+        if(ps2_avail()) {
+            id = ps2_getbyte();
+            if (id == PS2_MOUSE_RESP_ERROR) return MOUSE_ID_STANDARD; // Some older mouses respond with an error to this command
+            else if (id == PS2_MOUSE_RESP_NAK) mouse_command(PS2_MOUSE_CMD_READID, 0);
+            else if (id != PS2_MOUSE_RESP_ACK) break; // We're probably good
+        }
+    }
+
+    return id;
 }
