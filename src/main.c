@@ -33,6 +33,7 @@ static void rts_init(void);
 
 static void setLED(uint8_t status);
 static void blinkLED(uint8_t times); // Blink the led X times with a delay of 25msec
+static void soft_reset(void);
 
 static void sendMSPkt(void);
 static void sendMSWheelPkt(void);
@@ -184,4 +185,9 @@ static void sendMSWheelPkt(void) {
     uart_putchar(0x00, NULL);
     uart_putchar(0x00, NULL);
     uart_putchar(0x00, NULL);
+}
+
+static void soft_reset(void) {
+    wdt_enable(WDTO_15MS);  
+    while(1); // This will reset the unit
 }
