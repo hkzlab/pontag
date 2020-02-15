@@ -5,6 +5,9 @@
 
 #define EEPROM_ADDRESS_CFG 0x00
 
+#define CFG_RES_DEFAULT 2
+#define CFG_PROTO_DEFAULT 0
+
 static uint16_t calculate_CRC(uint8_t* buf, uint16_t len);
 static void reset_cfg(ConfigStruct *cfg);
 
@@ -21,8 +24,7 @@ uint8_t read_perm_config(ConfigStruct *cfg) {
 
 void write_perm_config(ConfigStruct *cfg) {
     cfg->crc = calculate_CRC(cfg->cfg_data.buf, sizeof(cfg->cfg_data.buf)); // Update CRC
-
-    // TODO: Store on EEPROM
+    eeprom_update_block(cfg, (uint8_t*)EEPROM_ADDRESS_CFG, sizeof(ConfigStruct));
 }
 
 static uint16_t calculate_CRC(uint8_t* buf, uint16_t len) {
@@ -36,7 +38,8 @@ static uint16_t calculate_CRC(uint8_t* buf, uint16_t len) {
 }
 
 static void reset_cfg(ConfigStruct *cfg) {
-    // TODO: Set defaults
+    cfg->cfg_data.c.proto = CFG_PROTO_DEFAULT;
+    cfg->cfg_data.c.res = CFG_RES_DEFAULT;
 
     cfg->crc = calculate_CRC(cfg->cfg_data.buf, sizeof(cfg->cfg_data.buf));
 }
