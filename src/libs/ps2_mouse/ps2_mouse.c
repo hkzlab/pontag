@@ -130,8 +130,7 @@ uint8_t mouse_init(uint8_t res) {
     // Check for mouse wheel
     mouse_sendSequence(ps2_wheel_sequence, sizeof(ps2_wheel_sequence));
     mouse_flush_med();
-    uint8_t id = mouse_get_id();
-    if(id == MOUSE_ID_WHEEL) retval |= MOUSE_EXT_MASK;
+    if(mouse_get_id() == MOUSE_ID_WHEEL) retval |= MOUSE_EXT_MASK;
 
     mouse_command(PS2_MOUSE_CMD_ENABLE, 1);
 
