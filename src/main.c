@@ -31,6 +31,7 @@ typedef union {
 static void rts_init(void);
 
 static void setLED(uint8_t status);
+static void blinkLED(uint8_t times); // Blink the led X times with a delay of 25msec
 
 static void sendMSPkt(void);
 static void sendMSWheelPkt(void);
@@ -92,7 +93,9 @@ int main(void) {
 
     wdt_reset(); // kick the watchdog again...
 
-    setLED(0); // Turn the LED off
+    // Notify which mouse we found
+    if(mouse_ext) blinkLED(20);
+    else blinkLED(5);
 
     while(1) {
         wdt_reset(); // Kick the watchdog
@@ -143,6 +146,18 @@ static void rts_init(void) {
 static void setLED(uint8_t status) {
     if(!status) LEDPORT &= ~(_BV(LED_P)); // Turn the LED off
     else LEDPORT |= _BV(LED_P); // Turn the LED on
+}
+
+static void blinkLED(uint8_t times) {
+    setLED(0);
+    while(times--) {
+         wdt_reset();
+         
+         setLED(1);
+         _delay_ms(50);
+         setLED(0);
+         _delay_ms(50);
+    }
 }
 
 ISR(INT1_vect) { // Manage INT1

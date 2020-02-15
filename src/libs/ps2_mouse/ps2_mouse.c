@@ -63,7 +63,7 @@ uint8_t mouse_reset(void) {
         _delay_ms(250);
         if (ps2_avail()) {
             b = ps2_getbyte();
-            if (b == PS2_MOUSE_RESP_RESETOK) {
+            if ((b == PS2_MOUSE_RESP_RESETOK) || (b == PS2_MOUSE_RESP_ACK)) { // Apparently, some mouses respond with ACK to a reset... 
                 break;
             } else {
                 return 1; // Fail!
@@ -123,8 +123,8 @@ uint8_t mouse_init(uint8_t ext) {
     wdt_reset();
 
     if(ext) {
-        mouse_sendSequence(ps2_wheel_sequence, sizeof(ps2_wheel_sequence));
-        mouse_flush_med();
+         mouse_sendSequence(ps2_wheel_sequence, sizeof(ps2_wheel_sequence));
+         mouse_flush_med();
         
         int16_t id = mouse_command(PS2_MOUSE_CMD_READID, 1);
         if(id == MOUSE_ID_WHEEL) retval |= MOUSE_EXT_MASK;
