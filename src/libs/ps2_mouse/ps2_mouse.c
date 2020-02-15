@@ -16,6 +16,7 @@ static const uint8_t ps2_wheel_sequence[] PROGMEM = { 0xF3, 0xC8,
 static void mouse_flush_fast(void);
 static void mouse_flush_med(void);
 static void mouse_flush_slow(void);
+static uint8_t mouse_get_status(void);
 static void mouse_sendSequence(const uint8_t *seq, uint8_t length);
 
 static void mouse_flush_fast(void) {
@@ -102,6 +103,7 @@ void mouse_setres(uint8_t res) {
 
 uint8_t mouse_init(uint8_t res) {
     uint8_t retval = 0;
+    uint8_t sreq = 0;
 
     ps2_enable_recv(1);
 
@@ -113,8 +115,11 @@ uint8_t mouse_init(uint8_t res) {
 
     mouse_command(PS2_MOUSE_CMD_SET_RESOLUTION, 1);
     mouse_command(res, 1); // 0 = 1, 1 = 2, 2 = 4, 3 = 8 counts/mm
+    mouse_flush_med();
 
-    int16_t sreq = mouse_command(PS2_MOUSE_CMD_STATREQ, 1);
+    // Get button status
+    sreq = mouse_get_status();
+    
     if(sreq >= 0) retval |= sreq & MOUSE_BTN_MASK;
 
     mouse_flush_med();
@@ -138,4 +143,20 @@ static void mouse_sendSequence(const uint8_t *seq, uint8_t length) {
     for(uint8_t idx = 0; idx < length; idx++) {
         ps2_sendbyte(pgm_read_byte(&seq[idx]));
     }
+}
+
+static uint8_t mouse_get_status(void) {
+    uint8_t sreq;
+
+    mouse_command(PS2_MOUSE_CMD_STATREQ, 0);
+    while(1) { // Loop until we get what we want or we die!
+        _delay_ms(20);
+        if(ps2_avail()) {
+            sreq = ps2_getbyte();
+            if(sreq == PS2_MOUSE_RESP_NAK) mouse_command(PS2_MOUSE_CMD_STATREQ, 0); // Send the command again
+            else if (sreq != PS2_MOUSE_RESP_ACK) break; // We're probably good and got our button statuses
+        }
+    }
+
+    return sreq;
 }
