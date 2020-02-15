@@ -1,5 +1,10 @@
 # Changelog
 ## 1.0 branch
+### 1.1.0 (2020.02.15)
+- **FIX**: Correctly read mouse status even if the device sends an 0xFA (ACK) before the actual response
+
+- **NEW**: Supports configuration via mouse buttons
+
 ### 1.0.2 (2020.02.14)
 - **FIX**: Do not uselessly repeat the detection string when `RTS` is toggled
 
