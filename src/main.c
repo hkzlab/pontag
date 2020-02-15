@@ -24,7 +24,7 @@
 typedef union {
     struct {
         uint8_t wheel_proto : 1;
-	    uint8_t unused : 5;
+        uint8_t unused : 5;
     } u;
     uint8_t header;
 } Options;
@@ -59,7 +59,7 @@ int main(void) {
 
     // Initialize the I/O and communications
     io_init();
-    
+
     // Read the option header
     opts.header = OPTPIN;
     if(!opts.u.wheel_proto) sendDetectPkt = sendMSPkt; // Else will remain the default
@@ -114,7 +114,7 @@ int main(void) {
                     // debug prints
                     //printf("%.2X %.2X %.2X\n", ps2_pkt_buf[0], ps2_pkt_buf[1], ps2_pkt_buf[2]);
                     //printf("ser -> %.2X %.2X %.2X %.2X\n", serial_pkt_buf[0], serial_pkt_buf[1], serial_pkt_buf[2], serial_pkt_buf[3]);
-                    
+
                     // Transmit the converted data to the serial port
                     uart_putchar(serial_pkt_buf[0], NULL);
                     uart_putchar(serial_pkt_buf[1], NULL);
@@ -154,7 +154,7 @@ static void blinkLED(uint8_t times) {
 
     while(times--) {
         wdt_reset();
-         
+
         setLED(1);
         _delay_ms(50);
         setLED(0);
@@ -164,7 +164,7 @@ static void blinkLED(uint8_t times) {
 
 ISR(INT1_vect) { // Manage INT1
     rts_disable_xmit = 1; // Avoid further transmission from the code in the main loop
-	
+
     sendDetectPkt();
     _delay_ms(10);
 
