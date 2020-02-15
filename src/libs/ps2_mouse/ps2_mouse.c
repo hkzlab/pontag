@@ -110,12 +110,7 @@ uint8_t mouse_init(uint8_t ext) {
     ps2_enable_recv(1);
 
     while(mouse_reset());
-
-    if(ext) {
-        mouse_sendSequence(ps2pp_magicKnock, sizeof(ps2pp_magicKnock));
-        // TODO: Read the response
-    }
-    
+ 
     mouse_command(PS2_MOUSE_CMD_DISABLE, 1);
     mouse_command(PS2_MOUSE_CMD_SET_DEFAULTS, 1);
 //    mouse_command(PS2_MOUSE_CMD_SCALNG21, 1);
@@ -125,10 +120,8 @@ uint8_t mouse_init(uint8_t ext) {
 //    mouse_command(1, 1);             // 0 = 1, 1 = 2, 2 = 4, 3 = 8 counts/mm
     mouse_command(2, 1);             // 0 = 1, 1 = 2, 2 = 4, 3 = 8 counts/mm
 
-    mouse_command(PS2_MOUSE_CMD_STATREQ, 1);
-    _delay_ms(22);
-
-    if (ps2_avail()) retval |= (ps2_getbyte() & 0x07);
+    int16_t sreq = mouse_command(PS2_MOUSE_CMD_STATREQ, 1));
+    if(sreq >= 0) retval |= sreq & 0x07;
 
     mouse_flush_med();
 
