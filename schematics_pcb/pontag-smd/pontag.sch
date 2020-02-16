@@ -1128,4 +1128,6 @@ F 3 "www.st.com/resource/en/datasheet/bat48.pdf" H 1050 5650 50  0001 C CNN
 	1    1050 5650
 	1    0    0    -1  
 $EndComp
+Text Label 3650 7050 0    50   ~ 0
+REG_5V
 $EndSCHEMATC
