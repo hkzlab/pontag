@@ -1,5 +1,8 @@
 # Changelog
 ## 1.0 branch
+### 1.1.2 (2020.02.16)
+- **NEW**: Add DEBUG mode that can be enabled by shorting the 2nd config header to GND.
+
 ### 1.1.1 (2020.02.15)
 - **FIX**: Correctly read device id even if the device sends an 0xFA or an 0xFC before the actual response
 

@@ -16,6 +16,12 @@ To configure the board you must keep the mouse button pessed during a reset of t
 * **Right mouse button pressed**: Switches mouse resolution, switching between 1, 2, 4 or 8 counts per mm traveled (**DEFAULT:** 4 counts per mm)
 * **Both buttons pressed**: Resets the board to defaults
 
+### Extra Header
+The board supports some special options that can be toggled via external header, shorting the corrisponding pin to GND.
+
+* Pin 1: If shorted, forces the use of the simple Microsoft protocol, regardless of what is stored in the EEPROM.
+* Pin 2: The board will enter debug mode, and start printing debug strings on the serial port
+
 ## Supported protocols
 PONTAG emulates a Microsoft 3-buttons Wheel serial mouse by default and transmits the `0x4D 0x5A 0x40 0x00 0x00 0x00` detection string when RTS signal is toggled.
 
