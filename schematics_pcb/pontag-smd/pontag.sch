@@ -330,13 +330,13 @@ PS2-DATA
 $Comp
 L Switch:SW_Push SW1
 U 1 1 5E47EC3B
-P 6300 5600
-F 0 "SW1" V 6254 5748 50  0000 L CNN
-F 1 "Reset" V 6345 5748 50  0000 L CNN
-F 2 "Button_Switch_SMD:SW_SPST_FSMSM" H 6300 5800 50  0001 C CNN
-F 3 "~" H 6300 5800 50  0001 C CNN
-	1    6300 5600
-	0    1    1    0   
+P 5950 5800
+F 0 "SW1" H 5750 5950 50  0000 L CNN
+F 1 "Reset" H 5995 5948 50  0000 L CNN
+F 2 "Button_Switch_SMD:SW_SPST_FSMSM" H 5950 6000 50  0001 C CNN
+F 3 "~" H 5950 6000 50  0001 C CNN
+	1    5950 5800
+	1    0    0    -1  
 $EndComp
 $Comp
 L Device:R R4
@@ -424,47 +424,6 @@ Wire Notes Line
 	6850 6550 4700 6550
 Text Notes 6100 6750 2    100  ~ 0
 PS/2 Connection
-$Comp
-L power:GND #PWR0117
-U 1 1 5E513C2C
-P 5250 6250
-F 0 "#PWR0117" H 5250 6000 50  0001 C CNN
-F 1 "GND" H 5400 6200 50  0000 C CNN
-F 2 "" H 5250 6250 50  0001 C CNN
-F 3 "" H 5250 6250 50  0001 C CNN
-	1    5250 6250
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	5250 6200 5250 6250
-$Comp
-L power:VCC #PWR0118
-U 1 1 5E51DBEA
-P 5250 5250
-F 0 "#PWR0118" H 5250 5100 50  0001 C CNN
-F 1 "VCC" H 5267 5423 50  0000 C CNN
-F 2 "" H 5250 5250 50  0001 C CNN
-F 3 "" H 5250 5250 50  0001 C CNN
-	1    5250 5250
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	5250 5250 5250 5300
-$Comp
-L Connector:AVR-ISP-6 J5
-U 1 1 5E3C9426
-P 5350 5800
-F 0 "J5" H 5500 6250 50  0000 R CNN
-F 1 "AVR-ISP-6" H 5750 5450 50  0000 R CNN
-F 2 "Connector_PinHeader_2.54mm:PinHeader_2x03_P2.54mm_Vertical" V 5100 5850 50  0001 C CNN
-F 3 " ~" H 4075 5250 50  0001 C CNN
-	1    5350 5800
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	5750 5700 6100 5700
-Text Label 6100 5700 2    50   ~ 0
-MOSI
 Wire Wire Line
 	3600 1800 4050 1800
 Text Label 4050 1800 2    50   ~ 0
@@ -473,14 +432,6 @@ Wire Wire Line
 	3600 1900 4050 1900
 Text Label 4050 1900 2    50   ~ 0
 MISO
-Wire Wire Line
-	5750 5600 6100 5600
-Text Label 6100 5600 2    50   ~ 0
-MISO
-Wire Wire Line
-	5750 5800 6100 5800
-Text Label 6100 5800 2    50   ~ 0
-SCK
 Text Label 3800 2000 2    50   ~ 0
 SCK
 $Comp
@@ -494,25 +445,6 @@ F 3 "~" H 1950 1350 50  0001 C CNN
 	1    1950 1350
 	1    0    0    -1  
 $EndComp
-Text Label 6100 5900 2    50   ~ 0
-RESET
-Wire Wire Line
-	6300 5900 6300 5800
-Wire Wire Line
-	5750 5900 6300 5900
-$Comp
-L power:GND #PWR0120
-U 1 1 5E57322F
-P 6300 5250
-F 0 "#PWR0120" H 6300 5000 50  0001 C CNN
-F 1 "GND" H 6305 5077 50  0000 C CNN
-F 2 "" H 6300 5250 50  0001 C CNN
-F 3 "" H 6300 5250 50  0001 C CNN
-	1    6300 5250
-	1    0    0    1   
-$EndComp
-Wire Wire Line
-	6300 5250 6300 5400
 Wire Notes Line
 	4700 4700 4700 6500
 Wire Notes Line
@@ -691,57 +623,22 @@ Wire Notes Line
 Text Notes 7050 750  0    100  ~ 0
 RS232 Port
 Wire Wire Line
-	3600 2700 4950 2700
-Wire Wire Line
-	3600 2600 4950 2600
-Wire Wire Line
 	3600 2400 4950 2400
 Wire Wire Line
 	3600 2300 4950 2300
 Wire Wire Line
 	3600 2200 4950 2200
-Wire Wire Line
-	5450 2200 5550 2200
-Wire Wire Line
-	5550 2200 5550 2300
-Wire Wire Line
-	5550 2700 5450 2700
-Wire Wire Line
-	5450 2300 5550 2300
-Connection ~ 5550 2300
-Wire Wire Line
-	5550 2300 5550 2400
-Wire Wire Line
-	5450 2400 5550 2400
-Connection ~ 5550 2400
-Wire Wire Line
-	5550 2400 5550 2450
-Wire Wire Line
-	5450 2500 5550 2500
-Connection ~ 5550 2500
-Wire Wire Line
-	5550 2500 5550 2600
-Wire Wire Line
-	5450 2600 5550 2600
-Connection ~ 5550 2600
-Wire Wire Line
-	5550 2600 5550 2700
 $Comp
 L power:GND #PWR0127
 U 1 1 5E39BF23
-P 5650 2450
-F 0 "#PWR0127" H 5650 2200 50  0001 C CNN
-F 1 "GND" H 5655 2277 50  0000 C CNN
-F 2 "" H 5650 2450 50  0001 C CNN
-F 3 "" H 5650 2450 50  0001 C CNN
-	1    5650 2450
+P 5600 2300
+F 0 "#PWR0127" H 5600 2050 50  0001 C CNN
+F 1 "GND" H 5605 2127 50  0000 C CNN
+F 2 "" H 5600 2300 50  0001 C CNN
+F 3 "" H 5600 2300 50  0001 C CNN
+	1    5600 2300
 	0    -1   -1   0   
 $EndComp
-Wire Wire Line
-	5550 2450 5650 2450
-Connection ~ 5550 2450
-Wire Wire Line
-	5550 2450 5550 2500
 Wire Notes Line
 	6850 4650 550  4650
 Wire Notes Line
@@ -770,17 +667,6 @@ Wire Wire Line
 Wire Wire Line
 	5950 7300 6550 7300
 Connection ~ 5650 7550
-$Comp
-L Connector_Generic:Conn_02x06_Odd_Even J7
-U 1 1 5E2843F3
-P 5150 2400
-F 0 "J7" H 5200 2817 50  0000 C CNN
-F 1 "Extra" H 5200 2726 50  0000 C CNN
-F 2 "Connector_PinSocket_2.54mm:PinSocket_2x06_P2.54mm_Vertical" H 5150 2400 50  0001 C CNN
-F 3 "~" H 5150 2400 50  0001 C CNN
-	1    5150 2400
-	1    0    0    -1  
-$EndComp
 $Comp
 L Device:C_Small C8
 U 1 1 5E4ACEE5
@@ -887,8 +773,6 @@ Connection ~ 2300 2350
 Wire Wire Line
 	2300 2350 2300 2400
 Connection ~ 3000 4050
-Wire Wire Line
-	3600 2500 4950 2500
 Wire Notes Line
 	550  4650 550  550 
 $Comp
@@ -1130,4 +1014,92 @@ F 3 "www.st.com/resource/en/datasheet/bat48.pdf" H 1050 5650 50  0001 C CNN
 $EndComp
 Text Label 3650 7050 0    50   ~ 0
 REG_5V
+$Comp
+L Connector:Conn_01x06_Male J5
+U 1 1 5E4A196F
+P 5150 5600
+F 0 "J5" H 5258 5981 50  0000 C CNN
+F 1 "ISP" H 5258 5890 50  0000 C CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_1x06_P2.54mm_Vertical" H 5150 5600 50  0001 C CNN
+F 3 "~" H 5150 5600 50  0001 C CNN
+	1    5150 5600
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:VCC #PWR?
+U 1 1 5E4A21A6
+P 5950 5300
+F 0 "#PWR?" H 5950 5150 50  0001 C CNN
+F 1 "VCC" H 5967 5473 50  0000 C CNN
+F 2 "" H 5950 5300 50  0001 C CNN
+F 3 "" H 5950 5300 50  0001 C CNN
+	1    5950 5300
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5350 5500 5950 5500
+Wire Wire Line
+	5950 5500 5950 5300
+Wire Wire Line
+	5350 5400 5650 5400
+Wire Wire Line
+	5350 5900 6000 5900
+Wire Wire Line
+	6000 5900 6000 6000
+$Comp
+L power:GND #PWR?
+U 1 1 5E4BB993
+P 6000 6000
+F 0 "#PWR?" H 6000 5750 50  0001 C CNN
+F 1 "GND" H 6005 5827 50  0000 C CNN
+F 2 "" H 6000 6000 50  0001 C CNN
+F 3 "" H 6000 6000 50  0001 C CNN
+	1    6000 6000
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5350 5600 5650 5600
+Wire Wire Line
+	5350 5700 5650 5700
+Text Label 5650 5400 2    50   ~ 0
+MISO
+Text Label 5650 5600 2    50   ~ 0
+SCK
+Text Label 5650 5700 2    50   ~ 0
+MOSI
+Text Label 5650 5800 2    50   ~ 0
+RESET
+Wire Wire Line
+	5350 5800 5750 5800
+Wire Wire Line
+	6000 5900 6300 5900
+Wire Wire Line
+	6300 5900 6300 5800
+Wire Wire Line
+	6300 5800 6150 5800
+Connection ~ 6000 5900
+$Comp
+L Connector_Generic:Conn_02x03_Odd_Even J7
+U 1 1 5E506A36
+P 5150 2300
+F 0 "J7" H 5200 2617 50  0000 C CNN
+F 1 "Extra" H 5200 2526 50  0000 C CNN
+F 2 "Connector_PinSocket_2.54mm:PinSocket_2x03_P2.54mm_Vertical" H 5150 2300 50  0001 C CNN
+F 3 "~" H 5150 2300 50  0001 C CNN
+	1    5150 2300
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5450 2300 5550 2300
+Wire Wire Line
+	5450 2200 5550 2200
+Wire Wire Line
+	5550 2200 5550 2300
+Connection ~ 5550 2300
+Wire Wire Line
+	5550 2300 5600 2300
+Wire Wire Line
+	5450 2400 5550 2400
+Wire Wire Line
+	5550 2400 5550 2300
 $EndSCHEMATC
