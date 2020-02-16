@@ -1,5 +1,8 @@
 # Changelog
 ## 1.0 branch
+### 1.1.3 (2020.02.16)
+- **FIX**: Add a timeout to READID and READSTATUS functions with a default return value. Some mouses seems not to respond to these commands (found a cheap *SAFEWAY* that did this) and this caused the board to reset.
+
 ### 1.1.2 (2020.02.16)
 - **NEW**: Add DEBUG mode that can be enabled by shorting the 2nd config header to GND.
 

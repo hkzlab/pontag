@@ -29,6 +29,7 @@
 
 #define MOUSE_EXT_MASK 0x08
 #define MOUSE_BTN_MASK 0x07
+#define MOUSE_ERR_MASK 0x10
 
 #define MOUSE_ID_STANDARD 0x00
 #define MOUSE_ID_WHEEL 0x03
@@ -36,7 +37,7 @@
 /**
  * Resets, initializes and configures the mouse
  * @param ext If != 0 enable the check for a PS/2++ compatible mouse
- * @return The status of the buttons in the 3 Least Significant Bits, 0 in the 4th bit if a normal mouse is detected, 1 if a PS/2++ compatible mouse is detected
+ * @return The status of the buttons in the 3 Least Significant Bits, 0 in the 4th bit if a normal mouse is detected, 1 if a PS/2++ compatible mouse is detected, the 5th bit indicates failure in responding to id or status requests
  */
 uint8_t mouse_init(uint8_t res);
 

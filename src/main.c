@@ -124,8 +124,9 @@ int main(void) {
     wdt_reset(); // kick the watchdog again...
 
     // Notify which mouse we found
-    if(init_res & MOUSE_EXT_MASK) blinkLED(20, 1);
-    else blinkLED(5, 1);
+    if (init_res & MOUSE_ERR_MASK) blinkLED(2, 1);
+    else if(init_res & MOUSE_EXT_MASK) blinkLED(25, 1);
+    else blinkLED(10, 1);
 
     while(1) {
         wdt_reset(); // Kick the watchdog

@@ -16,8 +16,8 @@ static const uint8_t ps2_wheel_sequence[] PROGMEM = { 0xF3, 0xC8,
 static void mouse_flush_fast(void);
 static void mouse_flush_med(void);
 static void mouse_flush_slow(void);
-static uint8_t mouse_get_status(void);
-static uint8_t mouse_get_id(void);
+static uint16_t mouse_get_status(void);
+static uint16_t mouse_get_id(void);
 static void mouse_sendSequence(const uint8_t *seq, uint8_t length);
 
 static void mouse_flush_fast(void) {
@@ -104,7 +104,8 @@ void mouse_setres(uint8_t res) {
 
 uint8_t mouse_init(uint8_t res) {
     uint8_t retval = 0;
-    uint8_t sreq = 0;
+    
+    uint16_t sreq = 0, id = 0;
 
     ps2_enable_recv(1);
 
@@ -118,11 +119,12 @@ uint8_t mouse_init(uint8_t res) {
     mouse_command(res, 1); // 0 = 1, 1 = 2, 2 = 4, 3 = 8 counts/mm
     mouse_flush_med();
 
+    wdt_reset();
+
     // Get button status
     sreq = mouse_get_status();
-    
-    if(sreq >= 0) retval |= sreq & MOUSE_BTN_MASK;
-
+    if((sreq & 0x00FF) >= 0) retval |= (sreq & MOUSE_BTN_MASK);
+    if(sreq & 0x0100) retval |= MOUSE_ERR_MASK; // Notify we did not get a response
     mouse_flush_med();
 
     wdt_reset();
@@ -130,7 +132,12 @@ uint8_t mouse_init(uint8_t res) {
     // Check for mouse wheel
     mouse_sendSequence(ps2_wheel_sequence, sizeof(ps2_wheel_sequence));
     mouse_flush_med();
-    if(mouse_get_id() == MOUSE_ID_WHEEL) retval |= MOUSE_EXT_MASK;
+
+    id = mouse_get_id();
+    if((id & 0x00FF) == MOUSE_ID_WHEEL) retval |= MOUSE_EXT_MASK;
+    if(id & 0x0100) retval |= MOUSE_ERR_MASK; // Notify we did not get a response
+
+    wdt_reset();
 
     mouse_command(PS2_MOUSE_CMD_ENABLE, 1);
 
@@ -145,35 +152,37 @@ static void mouse_sendSequence(const uint8_t *seq, uint8_t length) {
     }
 }
 
-static uint8_t mouse_get_status(void) {
-    uint8_t sreq;
+static uint16_t mouse_get_status(void) {
+    uint8_t sreq = 0;
+    uint8_t retries = 25;
 
     mouse_command(PS2_MOUSE_CMD_STATREQ, 0);
-    while(1) { // Loop until we get what we want or we die!
+    while(retries) { // Loop until we get what we want or we die!
         _delay_ms(20);
         if(ps2_avail()) {
             sreq = ps2_getbyte();
             if(sreq == PS2_MOUSE_RESP_NAK) mouse_command(PS2_MOUSE_CMD_STATREQ, 0); // Send the command again
             else if (sreq != PS2_MOUSE_RESP_ACK) break; // We're probably good and got our button statuses
-        }
+        } else retries--;
     }
 
-    return sreq;
+    return (sreq | (retries ? 0x0000 : 0x0100)); // Mark the return value to indicate we did not get a response
 }
 
-static uint8_t mouse_get_id(void) {
-    uint8_t id;
+static uint16_t mouse_get_id(void) {
+    uint8_t id = MOUSE_ID_STANDARD;
+    uint8_t retries = 25;
 
     mouse_command(PS2_MOUSE_CMD_READID, 0);
-    while(1) { // Loop until we get what we want or we die!
+    while(retries) { // Loop until we get what we want or we die!
         _delay_ms(20);
         if(ps2_avail()) {
             id = ps2_getbyte();
             if (id == PS2_MOUSE_RESP_ERROR) return MOUSE_ID_STANDARD; // Some older mouses respond with an error to this command
             else if (id == PS2_MOUSE_RESP_NAK) mouse_command(PS2_MOUSE_CMD_READID, 0);
             else if (id != PS2_MOUSE_RESP_ACK) break; // We're probably good
-        }
+        } else retries--;
     }
 
-    return id;
+    return (id | (retries ? 0x0000 : 0x0100));
 }
