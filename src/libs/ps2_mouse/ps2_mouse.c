@@ -118,11 +118,11 @@ uint8_t mouse_init(uint8_t res) {
     mouse_command(res, 1); // 0 = 1, 1 = 2, 2 = 4, 3 = 8 counts/mm
     mouse_flush_med();
 
+    wdt_reset();
+
     // Get button status
     sreq = mouse_get_status();
-    
     if(sreq >= 0) retval |= sreq & MOUSE_BTN_MASK;
-
     mouse_flush_med();
 
     wdt_reset();
@@ -131,6 +131,8 @@ uint8_t mouse_init(uint8_t res) {
     mouse_sendSequence(ps2_wheel_sequence, sizeof(ps2_wheel_sequence));
     mouse_flush_med();
     if(mouse_get_id() == MOUSE_ID_WHEEL) retval |= MOUSE_EXT_MASK;
+
+    wdt_reset();
 
     mouse_command(PS2_MOUSE_CMD_ENABLE, 1);
 
@@ -146,33 +148,35 @@ static void mouse_sendSequence(const uint8_t *seq, uint8_t length) {
 }
 
 static uint8_t mouse_get_status(void) {
-    uint8_t sreq;
+    uint8_t sreq = 0;
+    uint8_t retries = 25;
 
     mouse_command(PS2_MOUSE_CMD_STATREQ, 0);
-    while(1) { // Loop until we get what we want or we die!
+    while(retries) { // Loop until we get what we want or we die!
         _delay_ms(20);
         if(ps2_avail()) {
             sreq = ps2_getbyte();
             if(sreq == PS2_MOUSE_RESP_NAK) mouse_command(PS2_MOUSE_CMD_STATREQ, 0); // Send the command again
             else if (sreq != PS2_MOUSE_RESP_ACK) break; // We're probably good and got our button statuses
-        }
+        } else retries--;
     }
 
     return sreq;
 }
 
 static uint8_t mouse_get_id(void) {
-    uint8_t id;
+    uint8_t id = MOUSE_ID_STANDARD;
+    uint8_t retries = 25;
 
     mouse_command(PS2_MOUSE_CMD_READID, 0);
-    while(1) { // Loop until we get what we want or we die!
+    while(retries) { // Loop until we get what we want or we die!
         _delay_ms(20);
         if(ps2_avail()) {
             id = ps2_getbyte();
             if (id == PS2_MOUSE_RESP_ERROR) return MOUSE_ID_STANDARD; // Some older mouses respond with an error to this command
             else if (id == PS2_MOUSE_RESP_NAK) mouse_command(PS2_MOUSE_CMD_READID, 0);
             else if (id != PS2_MOUSE_RESP_ACK) break; // We're probably good
-        }
+        } else retries--;
     }
 
     return id;
