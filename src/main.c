@@ -23,8 +23,9 @@
 
 typedef union {
     struct {
-        uint8_t wheel_proto : 1;
-        uint8_t unused : 5;
+        uint8_t default_proto : 1; // if 1, default protocol is enabled, if 0, MS protocol is forced
+        uint8_t standard_mode : 1; // if 1, the board runs normally, if 0, the board enters debug mode
+        uint8_t unused : 4;
     } u;
     uint8_t header;
 } HeaderOptions;
@@ -39,6 +40,7 @@ static void update_configuration(uint8_t buttons, ConfigStruct *cfg);
 
 static void sendMSPkt(void);
 static void sendMSWheelPkt(void);
+static void sendDebugPkt(void);
 
 // Vars
 static volatile uint8_t rts_disable_xmit = 0;
@@ -72,11 +74,12 @@ int main(void) {
     read_perm_config(&cfg);
     
     // Option header always wins over stored config
-    if(!opts.u.wheel_proto || cfg.cfg_data.c.proto) cfg_force_ms = 1; // We're enforcing simple Microsoft protocol
+    if(!opts.u.default_proto || cfg.cfg_data.c.proto) cfg_force_ms = 1; // We're enforcing simple Microsoft protocol
     else cfg_force_ms = 0; // Enable mouse wheel protocol
 
     // Set which type of identification code we'll send
-    if(cfg_force_ms) sendDetectPkt = sendMSPkt;
+    if(!opts.u.standard_mode) sendDetectPkt = sendDebugPkt;
+    else if(cfg_force_ms) sendDetectPkt = sendMSPkt;
 
     // Initialize RTS interrupt and PS2
     rts_init();
@@ -98,8 +101,19 @@ int main(void) {
 
     setLED(1); // Turn the LED on
 
+    if(!opts.u.standard_mode) {
+        wdt_reset();
+        printf(" Board initialized!\n");
+        printf(" -- hdr -> proto:%u standard:%u\n", opts.u.default_proto, opts.u.standard_mode);
+        printf(" -- cfg -> proto:%u res:%u\n", cfg.cfg_data.c.proto, cfg.cfg_data.c.res);
+        printf(" -- Initializing PS/2 Mouse\n");
+        wdt_reset();
+    }
+
     init_res = mouse_init(cfg.cfg_data.c.res); // Initialize the mouse
 
+    if(!opts.u.standard_mode) printf(" -- Initializing result %02X\n", init_res);
+    
     // Check if we need to update the configuration
     update_configuration(init_res & MOUSE_BTN_MASK, &cfg);
 
@@ -127,14 +141,16 @@ int main(void) {
                     ps2_enable_recv(0); // Ok, stop receiving for now
 
                     // debug prints
-                    //printf("%.2X %.2X %.2X\n", ps2_pkt_buf[0], ps2_pkt_buf[1], ps2_pkt_buf[2]);
-                    //printf("ser -> %.2X %.2X %.2X %.2X\n", serial_pkt_buf[0], serial_pkt_buf[1], serial_pkt_buf[2], serial_pkt_buf[3]);
-
-                    // Transmit the converted data to the serial port
-                    uart_putchar(serial_pkt_buf[0], NULL);
-                    uart_putchar(serial_pkt_buf[1], NULL);
-                    uart_putchar(serial_pkt_buf[2], NULL);
-                    if(!cfg_force_ms) uart_putchar(serial_pkt_buf[3], NULL); // Send the fourth byte, according to the Microsoft Wheel mouse specs
+                    if(!opts.u.standard_mode) {
+                        printf("PS/2  <-- %02X %02X %02X %02X\n", ps2_pkt_buf[0], ps2_pkt_buf[1], ps2_pkt_buf[2], ps2_pkt_buf[3]);
+                        printf("RS232 --> %02X %02X %02X %02X\n\n", serial_pkt_buf[0], serial_pkt_buf[1], serial_pkt_buf[2], serial_pkt_buf[3]);
+                    } else { // Running normally
+                        // Transmit the converted data to the serial port
+                        uart_putchar(serial_pkt_buf[0], NULL);
+                        uart_putchar(serial_pkt_buf[1], NULL);
+                        uart_putchar(serial_pkt_buf[2], NULL);
+                        if(!cfg_force_ms) uart_putchar(serial_pkt_buf[3], NULL); // Send the fourth byte, according to the Microsoft Wheel mouse specs
+                    }
 
                     ps2_enable_recv(1); // Back to getting data!
                 }
@@ -197,6 +213,10 @@ static void sendMSWheelPkt(void) {
     uart_putchar(0x00, NULL);
     uart_putchar(0x00, NULL);
     uart_putchar(0x00, NULL);
+}
+
+static void sendDebugPkt(void) {
+    printf("DETECT_PKT\n");
 }
 
 static void update_configuration(uint8_t buttons, ConfigStruct *cfg) {
