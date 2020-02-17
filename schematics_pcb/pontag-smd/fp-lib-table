@@ -1,3 +1,4 @@
 (fp_lib_table
   (lib (name 4x1md_footprints)(type KiCad)(uri ${KIPRJMOD}/4x1md_kicad_libraries/footprints/Custom_Footprints.pretty)(options "")(descr ""))
+  (lib (name extra)(type KiCad)(uri ${KIPRJMOD}/extra)(options "")(descr ""))
 )
