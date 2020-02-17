@@ -18,14 +18,17 @@
 
 #include "main.h"
 
+#define VERSION "1.1.4"
+
 #define PS2_WHL_PKT_SIZE 4
 #define PS2_STD_PKT_SIZE 3
 
 typedef union {
     struct {
         uint8_t default_proto : 1; // if 1, default protocol is enabled, if 0, MS protocol is forced
+        uint8_t wheel_detect : 1; // if 1, we try PS/2 wheel detection
         uint8_t standard_mode : 1; // if 1, the board runs normally, if 0, the board enters debug mode
-        uint8_t unused : 4;
+        uint8_t unused : 3;
     } u;
     uint8_t header;
 } HeaderOptions;
@@ -103,14 +106,14 @@ int main(void) {
 
     if(!opts.u.standard_mode) {
         wdt_reset();
-        printf(" Board initialized!\n");
+        printf(" Board initialized! - %s\n", VERSION);
         printf(" -- hdr -> proto:%u standard:%u\n", opts.u.default_proto, opts.u.standard_mode);
         printf(" -- cfg -> proto:%u res:%u\n", cfg.cfg_data.c.proto, cfg.cfg_data.c.res);
         printf(" -- Initializing PS/2 Mouse\n");
         wdt_reset();
     }
 
-    init_res = mouse_init(cfg.cfg_data.c.res); // Initialize the mouse
+    init_res = mouse_init(cfg.cfg_data.c.res, opts.u.wheel_detect); // Initialize the mouse
 
     if(!opts.u.standard_mode) printf(" -- Initializing result %02X\n", init_res);
     
