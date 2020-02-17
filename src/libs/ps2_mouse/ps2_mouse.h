@@ -36,10 +36,11 @@
 
 /**
  * Resets, initializes and configures the mouse
- * @param ext If != 0 enable the check for a PS/2++ compatible mouse
+ * @param res resolution to initialize the mouse with
+ * @param wheel_detect if 1, we attempt wheel activation
  * @return The status of the buttons in the 3 Least Significant Bits, 0 in the 4th bit if a normal mouse is detected, 1 if a PS/2++ compatible mouse is detected, the 5th bit indicates failure in responding to id or status requests
  */
-uint8_t mouse_init(uint8_t res);
+uint8_t mouse_init(uint8_t res, uint8_t wheel_detect);
 
 uint8_t mouse_reset(void);
 int16_t mouse_command(uint8_t cmd, uint8_t wait);

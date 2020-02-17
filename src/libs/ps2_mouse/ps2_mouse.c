@@ -102,7 +102,7 @@ void mouse_setres(uint8_t res) {
     mouse_command(PS2_MOUSE_CMD_ENABLE, 1);
 }
 
-uint8_t mouse_init(uint8_t res) {
+uint8_t mouse_init(uint8_t res, uint8_t wheel_detect) {
     uint8_t retval = 0;
     
     uint16_t sreq = 0, id = 0;
@@ -130,7 +130,7 @@ uint8_t mouse_init(uint8_t res) {
     wdt_reset();
 
     // Check for mouse wheel
-    mouse_sendSequence(ps2_wheel_sequence, sizeof(ps2_wheel_sequence));
+    if(wheel_detect) mouse_sendSequence(ps2_wheel_sequence, sizeof(ps2_wheel_sequence));
     mouse_flush_med();
 
     id = mouse_get_id();
