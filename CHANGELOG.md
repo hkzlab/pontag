@@ -1,5 +1,8 @@
 # Changelog
 ## 1.0 branch
+### 1.1.5 (2020.03.01)
+- **FIX**: Send the actual reset packets as 7n1, whoops
+
 ### 1.1.4 (2020.02.17)
 - **NEW**: Add pin header to disable PS/2 wheel detection
 

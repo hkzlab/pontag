@@ -18,7 +18,7 @@
 
 #include "main.h"
 
-#define VERSION "1.1.4"
+#define VERSION "1.1.5"
 
 #define PS2_WHL_PKT_SIZE 4
 #define PS2_STD_PKT_SIZE 3
@@ -207,16 +207,16 @@ ISR(INT1_vect) { // Manage INT1
 }
 
 static void sendMSPkt(void) {
-    uart_putchar('M', NULL);
+    uart_putchar('M' | 0x80, NULL);
 }
 
 static void sendMSWheelPkt(void) {
-    uart_putchar('M', NULL);
-    uart_putchar('Z', NULL);
-    uart_putchar('@', NULL);
-    uart_putchar(0x00, NULL);
-    uart_putchar(0x00, NULL);
-    uart_putchar(0x00, NULL);
+    uart_putchar('M' | 0x80, NULL);
+    uart_putchar('Z' | 0x80, NULL);
+    uart_putchar('@' | 0x80, NULL);
+    uart_putchar(0x80, NULL);
+    uart_putchar(0x80, NULL);
+    uart_putchar(0x80, NULL);
 }
 
 static void sendDebugPkt(void) {
