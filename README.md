@@ -12,7 +12,7 @@ PONTAG is a board that converts a PS/2 mouse into a serial mouse that can be use
 
 ### Configuration
 The board can be configured during powerup by pressing the mouse keys. The configuration will be retained for all subsequent boots.
-To configure the board you must keep the mouse button pessed during a reset of the board. A sequence of **15 slow blinks** will notify the user of the accepted command, then the board will be reset with the new configuration.
+To configure the board you must keep the mouse button pressed during a reset/bootup. A sequence of **15 slow blinks** will notify the user of the accepted command, then the board will be reset with the new configuration.
 
 * **Left mouse button pressed**: Switches between simple Microsoft protocol and Microsoft protocol with wheel (**DEFAULT:** MS+Wheel)
 * **Right mouse button pressed**: Switches mouse resolution, switching between 1, 2, 4 or 8 counts per mm traveled (**DEFAULT:** 4 counts per mm)
