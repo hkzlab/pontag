@@ -30,4 +30,6 @@ PONTAG emulates a Microsoft 3-buttons Wheel serial mouse by default and transmit
 
 The boards are tested with [CuteMouse](http://cutemouse.sourceforge.net/).
 
+## Credits
 
+- Some footprints are taken from [4x1md](https://github.com/4x1md/kicad_libraries)
