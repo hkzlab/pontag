@@ -7,7 +7,6 @@
 #include <avr/io.h>
 #include <avr/wdt.h>
 #include <avr/interrupt.h>
-#include <avr/sleep.h>
 
 #include "ioconfig.h"
 #include "ps2.h"
@@ -16,6 +15,7 @@
 #include "pconfig.h"
 
 #include "uart.h"
+#include "millis.h"
 
 #include "main.h"
 
@@ -45,8 +45,6 @@ static void update_configuration(uint8_t buttons, ConfigStruct *cfg);
 static void sendMSPkt(void);
 static void sendMSWheelPkt(void);
 static void sendDebugPkt(void);
-
-static void sleepMode(void);
 
 // Vars
 static volatile uint8_t rts_disable_xmit = 0;
@@ -99,6 +97,9 @@ int main(void) {
     stdout = &uart_output;
     stdin  = &uart_input;
 
+    // Initialize millisecond counter
+    millis_init();
+
     // Enable interrupts
     sei();
 
@@ -134,10 +135,18 @@ int main(void) {
     else if(init_res & MOUSE_EXT_MASK) blinkLED(25, 1);
     else blinkLED(10, 1);
 
+    uint32_t last_pkt_time = millis();
+    uint32_t now = last_pkt_time;
+
     while(1) {
+        now = millis();
+        if(now < last_pkt_time) last_pkt_time = now; // Rollover...
+
         wdt_reset(); // Kick the watchdog
 
         while(ps2_avail()) {
+            last_pkt_time = now;
+
             ps2_pkt_buf[ps2_buf_counter] = ps2_getbyte();
             ps2_buf_counter = (ps2_buf_counter + 1) % ps2_pkt_size;
 
@@ -162,6 +171,7 @@ int main(void) {
                     ps2_enable_recv(1); // Back to getting data!
                 }
             }
+
         }
     }
 
@@ -255,19 +265,4 @@ static void update_configuration(uint8_t buttons, ConfigStruct *cfg) {
 static void soft_reset(void) {
     wdt_enable(WDTO_15MS);  
     while(1); // This will reset the unit
-}
-
-static void sleepMode(void) {
-    wdt_disable();
-
-    //set_sleep_mode(<mode>);
-    sleep_enable();
-    sleep_cpu();
-    sleep_disable();
-
-#if defined (__AVR_ATmega328P__)
-    wdt_enable(WDTO_4S); // Enable the watchdog to reset in 4 seconds...
-#elif defined (__AVR_ATmega8A__)
-    wdt_enable(WDTO_2S); // Enable the watchdog to reset in 2 seconds...
-#endif    
 }
