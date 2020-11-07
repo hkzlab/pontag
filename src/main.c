@@ -7,6 +7,7 @@
 #include <avr/io.h>
 #include <avr/wdt.h>
 #include <avr/interrupt.h>
+#include <avr/sleep.h>
 
 #include "ioconfig.h"
 #include "ps2.h"
@@ -20,6 +21,8 @@
 #include "main.h"
 
 #define VERSION "1.2.0"
+
+#define SLEEP_DELAY_TIME 30000 // 30 seconds without movement before we put the micro to sleep
 
 #define PS2_WHL_PKT_SIZE 4
 #define PS2_STD_PKT_SIZE 3
@@ -45,6 +48,8 @@ static void update_configuration(uint8_t buttons, ConfigStruct *cfg);
 static void sendMSPkt(void);
 static void sendMSWheelPkt(void);
 static void sendDebugPkt(void);
+
+static void sleepMode(uint8_t debug);
 
 // Vars
 static volatile uint8_t rts_disable_xmit = 0;
@@ -148,6 +153,10 @@ int main(void) {
             last_pkt_time = now;
 
             ps2_pkt_buf[ps2_buf_counter] = ps2_getbyte();
+            
+            // Wait for a packet that has fixed bit 3 at 1, this is an attempt at a resync
+            if(!ps2_buf_counter && !(ps2_pkt_buf[ps2_buf_counter] & 0x08)) continue;
+
             ps2_buf_counter = (ps2_buf_counter + 1) % ps2_pkt_size;
 
             if(!ps2_buf_counter) {
@@ -171,7 +180,12 @@ int main(void) {
                     ps2_enable_recv(1); // Back to getting data!
                 }
             }
+        }
 
+        if(now - last_pkt_time > SLEEP_DELAY_TIME) { 
+            sleepMode(!opts.u.standard_mode);
+            last_pkt_time = millis();
+            ps2_buf_counter = 0;
         }
     }
 
@@ -265,4 +279,44 @@ static void update_configuration(uint8_t buttons, ConfigStruct *cfg) {
 static void soft_reset(void) {
     wdt_enable(WDTO_15MS);  
     while(1); // This will reset the unit
+}
+
+void sleepMode(uint8_t debug) {
+    if(debug) printf("sleepMode() - Sleeping!!!\n\n");
+
+    wdt_disable();
+
+    set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+    cli();
+
+    // Set INT0 to interrupt on low level (falling edge won't work)
+#if defined (__AVR_ATmega8A__)
+    MCUCR &= ~(_BV(ISC01) | _BV(ISC00));
+#elif defined (__AVR_ATmega328P__)
+    EICRA &= ~(_BV(ISC01) | _BV(ISC00));
+#endif
+
+    // Go to sleep now...
+    sleep_enable();
+    sei();
+    sleep_cpu();
+    sleep_disable();
+
+    cli();
+
+    // Restore interrupt on falling edge for INT0
+#if defined (__AVR_ATmega8A__)
+    MCUCR |= _BV(ISC01);
+#elif defined (__AVR_ATmega328P__)
+    EICRA |= _BV(ISC01);
+#endif
+    sei();
+
+#if defined (__AVR_ATmega328P__)
+    wdt_enable(WDTO_4S); // Enable the watchdog to reset in 4 seconds...
+#elif defined (__AVR_ATmega8A__)
+    wdt_enable(WDTO_2S); // Enable the watchdog to reset in 2 seconds...
+#endif    
+    
+    if(debug) printf("sleepMode() - Woken Up!!!\n\n");
 }

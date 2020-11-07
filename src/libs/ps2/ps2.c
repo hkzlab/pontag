@@ -77,7 +77,6 @@ void ps2_init(void) {
 #if defined (__AVR_ATmega8A__)
     MCUCR |= _BV(ISC01);
 #elif defined (__AVR_ATmega328P__)
-//    EICRA &= ~(_BV(ISC00) | _BV(ISC01));
     EICRA |= _BV(ISC01);
 #endif
 
@@ -385,4 +384,3 @@ ISR(TIMER0_OVF_vect) {
         break;
     }
 }
-
