@@ -33,4 +33,4 @@ The boards are tested with [CuteMouse](http://cutemouse.sourceforge.net/).
 ## Credits
 
 - Some footprints are taken from [4x1md](https://github.com/4x1md/kicad_libraries)
-- Took and modified PS/2 code from [sensi.org](http://sensi.org/~svo/%5Bm%5Douse/doc/html/index.html) and [mouse1351](https://github.com/svofski/mouse1351)
+- Took and modified PS/2 code from [sensi.org](http://sensi.org/~svo/%5Bm%5Douse/) and [mouse1351](https://github.com/svofski/mouse1351)
