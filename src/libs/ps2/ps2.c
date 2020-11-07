@@ -6,7 +6,7 @@
 // Events not triggered by clock (end of transmission, transmission request, watchdog,
 // error recovery) use Timer0. Watch out how state changes in different handlers.
 //
-// Original code taken from here: http://sensi.org/~svo/%5Bm%5Douse/doc/html/index.html
+// Original code taken from here: https://github.com/svofski/mouse1351
 //
 
 #include <inttypes.h>
