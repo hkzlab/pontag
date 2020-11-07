@@ -7,6 +7,7 @@
 #include <avr/io.h>
 #include <avr/wdt.h>
 #include <avr/interrupt.h>
+#include <avr/sleep.h>
 
 #include "ioconfig.h"
 #include "ps2.h"
@@ -18,7 +19,7 @@
 
 #include "main.h"
 
-#define VERSION "1.1.5"
+#define VERSION "1.2.0"
 
 #define PS2_WHL_PKT_SIZE 4
 #define PS2_STD_PKT_SIZE 3
@@ -44,6 +45,8 @@ static void update_configuration(uint8_t buttons, ConfigStruct *cfg);
 static void sendMSPkt(void);
 static void sendMSWheelPkt(void);
 static void sendDebugPkt(void);
+
+static void sleepMode(void);
 
 // Vars
 static volatile uint8_t rts_disable_xmit = 0;
@@ -252,4 +255,19 @@ static void update_configuration(uint8_t buttons, ConfigStruct *cfg) {
 static void soft_reset(void) {
     wdt_enable(WDTO_15MS);  
     while(1); // This will reset the unit
+}
+
+static void sleepMode(void) {
+    wdt_disable();
+
+    //set_sleep_mode(<mode>);
+    sleep_enable();
+    sleep_cpu();
+    sleep_disable();
+
+#if defined (__AVR_ATmega328P__)
+    wdt_enable(WDTO_4S); // Enable the watchdog to reset in 4 seconds...
+#elif defined (__AVR_ATmega8A__)
+    wdt_enable(WDTO_2S); // Enable the watchdog to reset in 2 seconds...
+#endif    
 }
