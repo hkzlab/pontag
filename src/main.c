@@ -22,7 +22,7 @@
 
 #define VERSION "1.2.0"
 
-#define SLEEP_DELAY_TIME 30000 // 30 seconds without movement before we put the micro to sleep
+#define SLEEP_DELAY_TIME 120000 // 120 seconds without movement before we put the micro to sleep
 
 #define PS2_WHL_PKT_SIZE 4
 #define PS2_STD_PKT_SIZE 3
@@ -30,9 +30,10 @@
 typedef union {
     struct {
         uint8_t default_proto : 1; // if 1, default protocol is enabled, if 0, MS protocol is forced
-        uint8_t wheel_detect : 1; // if 1, we try PS/2 wheel detection
+        uint8_t powersave : 1; // if 1, we enable powersave after 2 minutes idle
         uint8_t standard_mode : 1; // if 1, the board runs normally, if 0, the board enters debug mode
-        uint8_t unused : 3;
+        uint8_t wheel_detect : 1; // if 1, we try PS/2 wheel detection
+        uint8_t unused : 2;
     } u;
     uint8_t header;
 } HeaderOptions;
@@ -113,10 +114,12 @@ int main(void) {
 
     setLED(1); // Turn the LED on
 
+    uart_enable();
+
     if(!opts.u.standard_mode) {
         wdt_reset();
         printf(" Board initialized! - %s\n", VERSION);
-        printf(" -- hdr -> proto:%u standard:%u\n", opts.u.default_proto, opts.u.standard_mode);
+        printf(" -- hdr -> proto:%u standard:%u pwrsave:%u wheel:%u\n", opts.u.default_proto, opts.u.standard_mode, opts.u.powersave, opts.u.wheel_detect);
         printf(" -- cfg -> proto:%u res:%u\n", cfg.cfg_data.c.proto, cfg.cfg_data.c.res);
         printf(" -- Initializing PS/2 Mouse\n");
         wdt_reset();
@@ -182,7 +185,7 @@ int main(void) {
             }
         }
 
-        if(now - last_pkt_time > SLEEP_DELAY_TIME) { 
+        if(!opts.u.powersave && ((now - last_pkt_time) > SLEEP_DELAY_TIME)) { 
             sleepMode(!opts.u.standard_mode);
             last_pkt_time = millis();
             ps2_buf_counter = 0;
@@ -196,13 +199,13 @@ static void rts_init(void) {
     // Enable INT1, and have it toggle at any logical level change
 #if defined (__AVR_ATmega328P__)
     // Toggle at the rising edge
-    EICRA |= (1 << ISC10);
-    EICRA &= ~(1 << ISC11);
-    EIMSK |= (1 << INT1);
+    EICRA |= _BV(ISC10);
+    EICRA &= ~_BV(ISC11);
+    EIMSK |= _BV(INT1);
 #elif defined (__AVR_ATmega8A__)
-    MCUCR |= (1 << ISC10);
-    MCUCR &= ~(1 << ISC11);
-    GICR  |= (1 << INT1);
+    MCUCR |= _BV(ISC10);
+    MCUCR &= ~_BV(ISC11);
+    GICR  |= _BV(INT1);
 #endif
 }
 
@@ -302,15 +305,12 @@ void sleepMode(uint8_t debug) {
     sleep_cpu();
     sleep_disable();
 
-    cli();
-
     // Restore interrupt on falling edge for INT0
 #if defined (__AVR_ATmega8A__)
     MCUCR |= _BV(ISC01);
 #elif defined (__AVR_ATmega328P__)
     EICRA |= _BV(ISC01);
 #endif
-    sei();
 
 #if defined (__AVR_ATmega328P__)
     wdt_enable(WDTO_4S); // Enable the watchdog to reset in 4 seconds...

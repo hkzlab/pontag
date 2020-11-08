@@ -98,16 +98,23 @@ void uart_init(void) {
 #if USE_2X
     UART_UCSRA |= (1 << UART_U2X);
 #else
-    UART_UCSRA &= ~(1 << UART_U2X);
+    UART_UCSRA &= ~_BV(UART_U2X);
 #endif
 
 #if defined (__AVR_ATmega8A__)
     // ATMega8A requires the msb to be set to 1, otherwise UBRRH is selected
-    UART_UCSRC = 0x80 | (1 << UART_UCSZ1) | (1 << UART_UCSZ0); /* 8-bit data */
+    UART_UCSRC = 0x80 | _BV(UART_UCSZ1) | _BV(UART_UCSZ0); /* 8-bit data */
 #else
-    UART_UCSRC = (1 << UART_UCSZ1) | (1 << UART_UCSZ0); /* 8-bit data */
+    UART_UCSRC = _BV(UART_UCSZ1) | _BV(UART_UCSZ0); /* 8-bit data */
 #endif
-    UART_UCSRB = (1 << UART_RXEN) | (1 << UART_TXEN);   /* Enable RX and TX */
+}
+
+void uart_enable(void) {
+    UART_UCSRB = _BV(UART_RXEN) | _BV(UART_TXEN);   /* Enable RX and TX */
+}
+
+void uart_disable(void) {
+    UART_UCSRB = 0;   /* Disable RX and TX */
 }
 
 int uart_putchar(char c, FILE *stream) {
