@@ -22,7 +22,7 @@
 
 #define VERSION "1.2.0"
 
-#define SLEEP_DELAY_TIME 120000 // 120 seconds without movement before we put the micro to sleep
+#define SLEEP_DELAY_TIME 150000 //  150 seconds without movement before we put the micro to sleep
 
 #define PS2_WHL_PKT_SIZE 4
 #define PS2_STD_PKT_SIZE 3
