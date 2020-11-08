@@ -22,7 +22,7 @@ To configure the board you must keep the mouse button pressed during a reset/boo
 The board supports some special options that can be toggled via external header, shorting the corrisponding pin to GND.
 
 * **Pin 1**: The board will enter debug mode, and start printing debug strings on the serial port. It will NOT work as a mouse.
-* **Pin 2**: If jumpered, the board enter power save mode after 2.5 minutes of mouse inactivity.
+* **Pin 2**: If jumpered, the board enter power save mode after 3 minutes of mouse inactivity.
 * **Pin 3**: If shorted, forces the use of the simple Microsoft protocol (2 buttons, no wheel), regardless of what is stored in the EEPROM.
 * **Pin 4**: If jumpered, the board will skip the PS/2 intellimouse wheel activation sequence. (**not exposed on board 1.0 !!!**)
 
