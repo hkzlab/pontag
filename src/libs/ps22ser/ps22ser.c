@@ -20,10 +20,7 @@ uint8_t ps2bufToSer(const uint8_t *src, uint8_t *dst) {
 
     // PS/2 has 9-bit two's complement notation
     // Serial (microsoft) has 8-bit two's complement notation
-    // We can ignore the least significant bit or...
-    // ignore the most significant one.
 
-    // We found out that this works best - Ignore the most significant bit
     // We need to invert Y
     int8_t y_mov = (-((src[0] & 0x20) ? (0x80 | src[2]) : src[2]));
     int8_t x_mov = ((src[0] & 0x10) ? (0x80 | src[1]) : src[1]);
