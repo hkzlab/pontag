@@ -22,22 +22,19 @@ uint8_t ps2bufToSer(const uint8_t *src, uint8_t *dst) {
     // Serial (microsoft) has 8-bit two's complement notation
 
     // We need to invert Y
-    int8_t y_mov = (-((src[0] & 0x20) ? (0x80 | src[2]) : src[2]));
-    int8_t x_mov = ((src[0] & 0x10) ? (0x80 | src[1]) : src[1]);
+    int8_t y_mov = (-((src[0] & 0x20) ? (0x80 | (src[2] >> 1)) : (src[2] >> 1)));
+    int8_t x_mov = ((src[0] & 0x10) ? (0x80 | (src[1] >> 1)) : (src[1] >> 1));
 
     y_mov |= (src[0] & 0x80) ? 0x7F : 0; 
     x_mov |= (src[0] & 0x40) ? 0x7F : 0; 
 
-    // Remove 1 from all the shifts to use the full resolution of the movement byte,
-    // but the movement might be too fast for low resolution software
-
     // Movement - First byte
-    dst[0] |= (x_mov >> 7) & 0x03; // X7,X6
-    dst[0] |= (y_mov >> 5) & 0x0C; // Y7,Y6
+    dst[0] |= (x_mov >> 6) & 0x03; // X7,X6
+    dst[0] |= (y_mov >> 4) & 0x0C; // Y7,Y6
     // Movement - Second byte
-    dst[1] |= ((x_mov >> 1) & 0x3F); // X5-X0
+    dst[1] |= (x_mov & 0x3F); // X5-X0
     // Movement - Third byte
-    dst[2] |= ((y_mov >> 1) & 0x3F); // Y5-Y0
+    dst[2] |= (y_mov & 0x3F); // Y5-Y0
 
     return retval;
 }
