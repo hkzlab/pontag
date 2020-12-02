@@ -20,7 +20,7 @@
 
 #include "main.h"
 
-#define VERSION "1.2.0"
+#define VERSION "1.2.1"
 
 #define SLEEP_DELAY_TIME 180000 //  3 minutes without movement before we put the micro to sleep
 
@@ -258,19 +258,22 @@ static void update_configuration(uint8_t buttons, ConfigStruct *cfg) {
         case 5: // Both buttons pressed, reset to defaults
             reset_perm_config(cfg);
             write_perm_config(cfg);
-            blinkLED(15, 0);
+            blinkLED(20, 0);
             soft_reset();
             break;
         case 4: // Left button, change protocol
             cfg->cfg_data.c.proto = !(cfg->cfg_data.c.proto);
             write_perm_config(cfg);
-            blinkLED(15, 0);
+            blinkLED(10, 0);
             soft_reset();
             break;
         case 1: // Right button, change resolution
             cfg->cfg_data.c.res = (cfg->cfg_data.c.res + 1) % 4;
             write_perm_config(cfg);
-            blinkLED(15, 0);
+            blinkLED(3, 0);
+            _delay_ms(500);
+            blinkLED(cfg->cfg_data.c.res + 1, 0);
+            _delay_ms(500);
             soft_reset();
             break;
         case 0: // Nothing to do
