@@ -22,8 +22,8 @@ uint8_t ps2bufToSer(const uint8_t *src, uint8_t *dst) {
     // Serial (microsoft) has 8-bit two's complement notation
 
     // We need to invert Y
-    int8_t y_mov = (-((src[0] & 0x20) ? (0x80 | (src[2] >> 1)) : (src[2] >> 1)));
-    int8_t x_mov = ((src[0] & 0x10) ? (0x80 | (src[1] >> 1)) : (src[1] >> 1));
+    int8_t y_mov = (-((src[0] & 0x20) ? (0x80 | src[2]) : (src[2] & 0x7F)));
+    int8_t x_mov = ((src[0] & 0x10) ? (0x80 | src[1]) : (src[1] & 0x7F));
 
     y_mov |= (src[0] & 0x80) ? 0x7F : 0; 
     x_mov |= (src[0] & 0x40) ? 0x7F : 0; 
