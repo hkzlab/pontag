@@ -6,7 +6,7 @@ encoding utf-8
 Sheet 1 1
 Title "Pontag Mouse Adapter (SMD)"
 Date ""
-Rev ""
+Rev "1.1"
 Comp "HKZlab"
 Comment1 ""
 Comment2 ""
@@ -151,7 +151,7 @@ Wire Notes Line
 Wire Notes Line
 	2250 7750 2250 6550
 $Comp
-L Connector:DB9_Female_MountingHoles J3
+L Connector:DB9_Female J3
 U 1 1 5E3B36FB
 P 9150 2300
 F 0 "J3" V 9400 1950 50  0000 L CNN
@@ -518,19 +518,6 @@ F 3 "" H 8200 4950 50  0001 C CNN
 $EndComp
 Wire Wire Line
 	8350 4950 8200 4950
-$Comp
-L power:GND #PWR0124
-U 1 1 5E618865
-P 8450 2300
-F 0 "#PWR0124" H 8450 2050 50  0001 C CNN
-F 1 "GND" H 8455 2127 50  0000 C CNN
-F 2 "" H 8450 2300 50  0001 C CNN
-F 3 "" H 8450 2300 50  0001 C CNN
-	1    8450 2300
-	0    1    1    0   
-$EndComp
-Wire Wire Line
-	8550 2300 8500 2300
 Wire Wire Line
 	8350 3950 8250 3950
 Wire Wire Line
@@ -599,11 +586,6 @@ Wire Wire Line
 	8750 2000 8750 1900
 Wire Wire Line
 	8750 1900 8500 1900
-Wire Wire Line
-	8500 1900 8500 2300
-Connection ~ 8500 2300
-Wire Wire Line
-	8500 2300 8450 2300
 Wire Wire Line
 	9250 2000 9250 1250
 Text Label 9250 1250 3    50   ~ 0
@@ -832,17 +814,6 @@ F 3 "~" H 4100 5650 50  0001 C CNN
 $EndComp
 Wire Wire Line
 	3600 2000 4100 2000
-$Comp
-L Device:Jumper_NC_Small JP1
-U 1 1 5E66F5A3
-P 4100 7050
-F 0 "JP1" H 4100 7262 50  0000 C CNN
-F 1 "Internal 5V" H 4100 7171 50  0000 C CNN
-F 2 "Jumper:SolderJumper-2_P1.3mm_Open_RoundedPad1.0x1.5mm" H 4100 7050 50  0001 C CNN
-F 3 "~" H 4100 7050 50  0001 C CNN
-	1    4100 7050
-	1    0    0    -1  
-$EndComp
 Wire Wire Line
 	4200 7050 4400 7050
 Wire Wire Line
@@ -852,7 +823,7 @@ L Connector:Conn_01x02_Male J1
 U 1 1 5E67D658
 P 2400 5650
 F 0 "J1" H 2350 5650 50  0000 R CNN
-F 1 "External 5V" H 2700 5500 50  0000 R CNN
+F 1 "Ext. VCC" H 2550 5500 50  0000 R CNN
 F 2 "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical" H 2400 5650 50  0001 C CNN
 F 3 "~" H 2400 5650 50  0001 C CNN
 	1    2400 5650
@@ -1015,10 +986,10 @@ $EndComp
 Text Label 3650 7050 0    50   ~ 0
 REG_5V
 $Comp
-L power:VCC #PWR?
+L power:VCC #PWR0117
 U 1 1 5E4A21A6
 P 5400 5150
-F 0 "#PWR?" H 5400 5000 50  0001 C CNN
+F 0 "#PWR0117" H 5400 5000 50  0001 C CNN
 F 1 "VCC" H 5417 5323 50  0000 C CNN
 F 2 "" H 5400 5150 50  0001 C CNN
 F 3 "" H 5400 5150 50  0001 C CNN
@@ -1045,10 +1016,10 @@ U 1 1 5E506A36
 P 5150 2300
 F 0 "J7" H 5200 2617 50  0000 C CNN
 F 1 "Extra" H 5200 2526 50  0000 C CNN
-F 2 "Connector_PinSocket_2.54mm:PinSocket_2x03_P2.54mm_Vertical" H 5150 2300 50  0001 C CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_2x03_P2.54mm_Vertical" H 5150 2300 50  0001 C CNN
 F 3 "~" H 5150 2300 50  0001 C CNN
 	1    5150 2300
-	1    0    0    -1  
+	1    0    0    1   
 $EndComp
 Wire Wire Line
 	5450 2300 5550 2300
@@ -1068,21 +1039,10 @@ Wire Wire Line
 Wire Wire Line
 	5900 5650 6200 5650
 $Comp
-L Connector:AVR-ISP-6 J5
-U 1 1 5E4DFCE1
-P 5500 5750
-F 0 "J5" H 5171 5846 50  0000 R CNN
-F 1 "AVR-ISP-6" H 5171 5755 50  0000 R CNN
-F 2 "Connector_PinHeader_2.54mm:PinHeader_2x03_P2.54mm_Vertical" V 5250 5800 50  0001 C CNN
-F 3 " ~" H 4225 5200 50  0001 C CNN
-	1    5500 5750
-	1    0    0    -1  
-$EndComp
-$Comp
-L power:GND #PWR?
+L power:GND #PWR0118
 U 1 1 5E54C3E0
 P 5400 6250
-F 0 "#PWR?" H 5400 6000 50  0001 C CNN
+F 0 "#PWR0118" H 5400 6000 50  0001 C CNN
 F 1 "GND" H 5405 6077 50  0000 C CNN
 F 2 "" H 5400 6250 50  0001 C CNN
 F 3 "" H 5400 6250 50  0001 C CNN
@@ -1094,4 +1054,54 @@ Wire Wire Line
 Wire Wire Line
 	6300 6250 5400 6250
 Connection ~ 5400 6250
+$Comp
+L Device:Jumper_NC_Small JP1
+U 1 1 5E66F5A3
+P 4100 7050
+F 0 "JP1" H 4100 7262 50  0000 C CNN
+F 1 "Internal 5V" H 4100 7171 50  0000 C CNN
+F 2 "Jumper:SolderJumper-2_P1.3mm_Open_RoundedPad1.0x1.5mm" H 4100 7050 50  0001 C CNN
+F 3 "~" H 4100 7050 50  0001 C CNN
+	1    4100 7050
+	1    0    0    -1  
+$EndComp
+$Comp
+L Connector:AVR-ISP-6 J5
+U 1 1 5E4DFCE1
+P 5500 5750
+F 0 "J5" H 5171 5846 50  0000 R CNN
+F 1 "AVR-ISP-6" H 5171 5755 50  0000 R CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_2x03_P2.54mm_Vertical" V 5250 5800 50  0001 C CNN
+F 3 " ~" H 4225 5200 50  0001 C CNN
+	1    5500 5750
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR0119
+U 1 1 60B9BE26
+P 8500 2050
+F 0 "#PWR0119" H 8500 1800 50  0001 C CNN
+F 1 "GND" H 8505 1877 50  0000 C CNN
+F 2 "" H 8500 2050 50  0001 C CNN
+F 3 "" H 8500 2050 50  0001 C CNN
+	1    8500 2050
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	8500 1900 8500 2050
+NoConn ~ 9450 2000
+NoConn ~ 9550 2000
+NoConn ~ 9050 2000
+NoConn ~ 8850 2000
+NoConn ~ 3600 1500
+NoConn ~ 3600 1600
+NoConn ~ 3600 1700
+NoConn ~ 3600 2500
+NoConn ~ 3600 2600
+NoConn ~ 3600 2700
+NoConn ~ 3600 3400
+NoConn ~ 3600 3500
+NoConn ~ 3600 3600
+NoConn ~ 5350 7200
+NoConn ~ 5350 7400
 $EndSCHEMATC
